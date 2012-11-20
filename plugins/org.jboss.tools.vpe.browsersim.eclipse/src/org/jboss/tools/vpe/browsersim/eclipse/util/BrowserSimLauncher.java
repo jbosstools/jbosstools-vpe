@@ -28,6 +28,7 @@ import org.jboss.tools.vpe.browsersim.eclipse.Activator;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.BrowserSimCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.OpenFileCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.ViewSourceCallback;
+import org.jboss.tools.vpe.browsersim.ui.BrowserSim;
 import org.osgi.framework.Bundle;
 
 /**
@@ -47,6 +48,8 @@ public class BrowserSimLauncher {
 		// org.eclipse.swt plugin may contain this fragment in itself - that is why it is optional. See JBIDE-11923
 		"org.eclipse.swt." + PlatformUtil.CURRENT_PLATFORM 
 	};
+	//if you change this parameter, see also @org.jbosstools.browsersim.ui.BrowserSim
+	private static final String NOT_STANDALONE = "-not-standalone"; //$NON-NLS-1$
 	
 
 	public static void launchBrowserSim(String initialUrl) {
@@ -71,6 +74,7 @@ public class BrowserSimLauncher {
 			
 			List<String> commandElements = new ArrayList<String>();
 			commandElements.add(javaCommand);
+			
 			if (Platform.OS_MACOSX.equals(Platform.getOS())) {
 				commandElements.add("-XstartOnFirstThread"); //$NON-NLS-1$
 				if (Platform.ARCH_X86.equals(Platform.getOSArch())) {
@@ -81,10 +85,13 @@ public class BrowserSimLauncher {
 			commandElements.add("-cp"); //$NON-NLS-1$
 			commandElements.add(classPath);
 			commandElements.add(BROWSERSIM_CLASS_NAME);
+			
+			//optional parameters
+			commandElements.add(NOT_STANDALONE);
 			if (initialUrl != null) {
 				commandElements.add(initialUrl);
 			}
-
+			
 			ProcessBuilder processBuilder = new ProcessBuilder(commandElements);
 			processBuilder.directory(ConfigurationScope.INSTANCE.getLocation().toFile());
 			
