@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.jboss.tools</groupId>
 		<artifactId>parent</artifactId>
-		<version>4.0.0.CR1-SNAPSHOT</version>
+		<version>4.1.0.Alpha1-SNAPSHOT</version>
 		<relativePath>../jbosstools-build/parent/pom.xml</relativePath>
 	</parent>
 	<groupId>org.jboss.tools</groupId>
@@ -22,9 +22,9 @@
 		<profile>
 			<id>bootstrap</id>
 			<modules>
-				<module>../xulrunner</module>
-				<module>../jst</module>
-				<module>../base</module>
+				<module>../jbosstools-xulrunner</module>
+				<module>../jbosstools-jst</module>
+				<module>../jbosstools-base</module>
 			</modules>
 		</profile>
 	</profiles>
