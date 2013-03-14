@@ -40,8 +40,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
-import org.jboss.tools.vpe.browsersim.model.DevicesListStorage;
 import org.jboss.tools.vpe.browsersim.ui.Messages;
+import org.jboss.tools.vpe.browsersim.util.PreferencesUtil;
 
 /**
  * 
@@ -160,7 +160,7 @@ public class ScreenshotMenuCreator {
 
 		ImageLoader loader = new ImageLoader();
 		loader.data = new ImageData[] { image.getImageData() };
-		loader.save(defaultScreenshotFolder + DevicesListStorage.SEPARATOR + getDefaultFilename(), SWT.IMAGE_PNG);
+		loader.save(defaultScreenshotFolder + PreferencesUtil.SEPARATOR + getDefaultFilename(), SWT.IMAGE_PNG);
 		
 		image.dispose();
 	}
@@ -171,7 +171,7 @@ public class ScreenshotMenuCreator {
 		
 		ImageLoader loader = new ImageLoader();
 		loader.data = new ImageData[] { image.getImageData() };
-		loader.save(f.getAbsolutePath() + DevicesListStorage.SEPARATOR + fileName, SWT.IMAGE_PNG);
+		loader.save(f.getAbsolutePath() + PreferencesUtil.SEPARATOR + fileName, SWT.IMAGE_PNG);
 		
 		image.dispose();
 	}
