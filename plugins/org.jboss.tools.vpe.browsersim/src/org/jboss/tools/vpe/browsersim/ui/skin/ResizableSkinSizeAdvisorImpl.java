@@ -14,10 +14,13 @@ package org.jboss.tools.vpe.browsersim.ui.skin;
  * @author Yahor Radtsevich (yradtsevich)
  */
 
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.vpe.browsersim.model.TruncateWindow;
+import org.jboss.tools.vpe.browsersim.model.FitToScreen;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.ui.SizeWarningDialog;
@@ -28,6 +31,8 @@ public class ResizableSkinSizeAdvisorImpl implements ResizableSkinSizeAdvisor{
 	private SpecificPreferences specificPreferences;
 	private Shell shell;
 	
+	private LocationAdapter zoomAdapter;
+	
 	public ResizableSkinSizeAdvisorImpl(CommonPreferences cp, SpecificPreferences sp, Shell shell) {
 		super();
 		this.commonPreferences = cp;
@@ -36,11 +41,14 @@ public class ResizableSkinSizeAdvisorImpl implements ResizableSkinSizeAdvisor{
 	}
 
 	@Override
-	public Point checkWindowSize(int orientation, Point prefferedSize, Point prefferedShellSize) {
+	public Point checkWindowSize(int orientation, Point prefferedSize, Point prefferedShellSize, final Browser browser) {
 		Rectangle clientArea = BrowserSimUtil.getMonitorClientArea(shell.getMonitor());
-
-		TruncateWindow truncateWindow = null;
-		if (commonPreferences.getTruncateWindow() == TruncateWindow.PROMPT) {
+		if (zoomAdapter != null) {
+			browser.removeLocationListener(zoomAdapter);
+		}
+		
+		FitToScreen fitToScreen = null;
+		if (commonPreferences.getFitToScreen() == FitToScreen.PROMPT) {
 			if (prefferedShellSize.x > clientArea.width || prefferedShellSize.y > clientArea.height) { 
 				String deviceName = commonPreferences.getDevices().get(specificPreferences.getSelectedDeviceIndex()).getName();
 				
@@ -49,21 +57,80 @@ public class ResizableSkinSizeAdvisorImpl implements ResizableSkinSizeAdvisor{
 						orientation == SpecificPreferences.ORIENTATION_PORTRAIT || orientation == SpecificPreferences.ORIENTATION_PORTRAIT_INVERTED);
 				dialog.open();
 
-				truncateWindow = dialog.getTruncateWindow();
+				fitToScreen = dialog.getFitToScreen();
 				if (dialog.getRememberDecision()) {
-					commonPreferences.setTruncateWindow(truncateWindow);
+					commonPreferences.setFitToScreen(fitToScreen);
 				}
 			}
 		} else {
-			truncateWindow = commonPreferences.getTruncateWindow();
+			fitToScreen = commonPreferences.getFitToScreen();
 		}
 
 		Point size = new Point(prefferedShellSize.x, prefferedShellSize.y);
-		if (TruncateWindow.ALWAYS_TRUNCATE.equals(truncateWindow)) {
-			size.x = Math.min(prefferedShellSize.x, clientArea.width);
-			size.y = Math.min(prefferedShellSize.y, clientArea.height);
+		double bsZoom = Math.min((double)clientArea.width/prefferedShellSize.x, (double)clientArea.height/prefferedShellSize.y);
+		
+		if (FitToScreen.ALWAYS_FIT.equals(fitToScreen) && bsZoom < 1) {
+			size.x = (int) (prefferedShellSize.x * bsZoom);
+			size.y = (int) (prefferedShellSize.y * bsZoom);			
+			
+			double pageZoom = 1;
+			String pageZoomValue = ((String) browser.evaluate("return document.documentElement.style.zoom")).trim();
+			if (!pageZoomValue.isEmpty()) {
+				if (pageZoomValue.endsWith("%")) {
+					pageZoomValue = pageZoomValue.replace("%", "");
+					pageZoom = Double.parseDouble(pageZoomValue) / 100;
+				} 
+				pageZoom = Double.parseDouble(pageZoomValue);
+			}
+			
+			final double zoom = pageZoom * bsZoom;
+			setPageZoom(browser, zoom);
+			zoomAdapter = new LocationAdapter() {
+				@Override
+				public void changed(LocationEvent event) {
+					browser.execute(
+				    	      "(function(){" +
+				    	       "if (!document.getElementById('browserSimZoom')) {" +
+				    	        "var f = function(){" +
+				    	         "document.removeEventListener('DOMNodeInserted', f);" +
+				    	         "el=document.createElement('style');" +
+				    	         "el.id = 'browserSimZoom';" +
+				    	         "el.innerText='html{zoom:" + zoom + "}';" +
+				    	         "document.documentElement.appendChild(el);" +
+				    	        "};" +
+				    	        "document.addEventListener('DOMNodeInserted', f);" +
+				    	       "}" +
+				    	      "})()");
+				}
+			};
+			browser.addLocationListener(zoomAdapter);
+		} else {
+			removePageZoom(browser);
 		}
 
 		return size;
+	}
+	
+	private void setPageZoom(Browser browser, double zoom) {
+		browser.execute(
+	    	      "(function(){" +
+	    	       "if (!document.getElementById('browserSimZoom')) {" +
+	    	         "document.removeEventListener('DOMNodeInserted', f);" +
+	    	         "el=document.createElement('style');" +
+	    	         "el.id = 'browserSimZoom';" +
+	    	         "document.documentElement.appendChild(el);" +
+	    	       "}" +
+	    	       "el.innerText='html{zoom:" + zoom + "}';" +
+	    	      "})()");
+	}
+	
+	private void removePageZoom(Browser browser) {
+		browser.execute(
+	    	      "(function(){" +
+	    	       "if (document.getElementById('browserSimZoom')) {" +
+	    	    		"var zoomElement = document.getElementById('browserSimZoom');" +
+	    	        	"zoomElement.parentNode.removeChild(zoomElement);" +
+	    	       "}" +
+	    	      "})()");
 	}
 }
