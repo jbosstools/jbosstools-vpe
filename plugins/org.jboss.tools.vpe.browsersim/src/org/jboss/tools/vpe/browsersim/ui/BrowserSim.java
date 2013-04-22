@@ -272,6 +272,23 @@ public class BrowserSim {
 				WebSqlLoader.initWebSql(skin.getBrowser());
 			}
 		});
+		
+		browser.addLocationListener(new LocationAdapter() {
+			public void changed(LocationEvent event) {
+				Browser browser = (Browser) event.widget;
+				browser.execute(
+						"if (!window.LiveReload) {" +
+							"window.addEventListener('load', function(){" +
+								"var e = document.createElement('script');" +
+								"var host = window.location.hostname || 'localhost';" +
+								"e.type = 'text/javascript';" +
+								"e.async = 'true';" +
+								"e.src = 'http://' + host + ':35729/livereload.js';" +
+								"document.head.appendChild(e);" +
+							"});" +
+						"}");
+			}
+		});
 
 		//JBIDE-12191 - custom scrollbars work satisfactorily on windows only
 		if (PlatformUtil.OS_WIN32.equals(PlatformUtil.getOs())) {
