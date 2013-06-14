@@ -162,7 +162,7 @@ public class BrowserSimSpecificPreferencesStorage extends SpecificPreferencesSto
 	}
 
 	@Override
-	protected SpecificPreferences getDefault() {
+	protected SpecificPreferences getDefaultObject() {
 		return new BrowserSimSpecificPreferences(null, true, false, 0, null);
 	}
 
