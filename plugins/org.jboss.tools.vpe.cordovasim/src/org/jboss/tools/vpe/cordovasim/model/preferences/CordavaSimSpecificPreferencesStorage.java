@@ -156,7 +156,7 @@ public class CordavaSimSpecificPreferencesStorage extends SpecificPreferencesSto
 	}
 
 	@Override
-	protected SpecificPreferences getDefault() {
+	protected SpecificPreferences getDefaultObject() {
 		return new CordovaSimSpecificPreferences(null, true, false, 0, null, null, null);
 	}
 

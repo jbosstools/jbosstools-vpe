@@ -57,7 +57,7 @@ public abstract class SpecificPreferencesStorage implements PreferencesStorage{
 		specificPreferences = load(getDefaultFile());
 		
 		if (specificPreferences == null) {
-			specificPreferences = loadDefault();
+			specificPreferences = getDefaultObject();
 		}
 
 		return specificPreferences;
@@ -67,7 +67,7 @@ public abstract class SpecificPreferencesStorage implements PreferencesStorage{
 	
 	protected abstract SpecificPreferences load(File path);
 	
-	protected abstract SpecificPreferences getDefault();
+	protected abstract SpecificPreferences getDefaultObject();
 
 	protected abstract void save(SpecificPreferences sp, File file);
 	
