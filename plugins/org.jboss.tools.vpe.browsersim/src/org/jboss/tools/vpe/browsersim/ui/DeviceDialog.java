@@ -87,9 +87,9 @@ public abstract class DeviceDialog extends Dialog {
 	public Device open() {
 		createContents();
 
-		shell.open();
-		shell.layout();
 		shell.setSize(shell.computeSize(330, SWT.DEFAULT));
+		shell.layout();	
+		shell.open();
 		Display display = getParent().getDisplay();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
