@@ -113,7 +113,7 @@ public class ServerCreator {
 			public String matchAndApply(String target, HttpServletRequest request,
 					HttpServletResponse response) throws IOException {
 				if (request.getPathInfo().equals("/cordova.js")){ // JBIDE-14319
-					return "/ripple/cordova/cordova-2.7.0.js";
+					return "/ripple/cordova/cordova-2.9.0.js";
 				} else if (request.getPathInfo().equals("/cordova_plugins.json")){ // JBIDE-14453
 					return "/ripple/cordova/cordova_plugins.json";
 				} else {
