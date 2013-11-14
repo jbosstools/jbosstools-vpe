@@ -53,6 +53,7 @@ public abstract class ResizableSkin implements BrowserSimSkin {
 	private Point horizontalBorderSize;
 	private Point verticalBorderSize;
 	private Point maxScreenSize;
+	private Composite innerBrowserContainer;
 
 	public ResizableSkin(int[] visibleRegionHorizontal, int[] visibleRegionVertical, Point normalScreenSize,
 			Point normalSkinSize) {
@@ -84,7 +85,9 @@ public abstract class ResizableSkin implements BrowserSimSkin {
 		bindDeviceCompositeControls();
 		Composite browserContainer = deviceComposite.getBrowserContainer();
 		browserContainer.setLayout(new FillLayout());
-		browser = browserFactory.createBrowser(browserContainer, SWT.NONE);
+		innerBrowserContainer = new Composite(browserContainer, SWT.NONE);
+		innerBrowserContainer.setLayout(new FillLayout());
+		browser = browserFactory.createBrowser(innerBrowserContainer, SWT.NONE);
 		
 		shell.setSize(/*shell.computeSize(SWT.DEFAULT, SWT.DEFAULT)*/ 384, 727);
 		setShellRegion();		
@@ -286,7 +289,7 @@ public abstract class ResizableSkin implements BrowserSimSkin {
 		bindDeviceCompositeControls();
 		Composite browserContainer = deviceComposite.getBrowserContainer();
 		browserContainer.setLayout(new FillLayout());
-		browser.setParent(browserContainer);
+		innerBrowserContainer.setParent(browserContainer);
 		oldDeviceComposite.dispose();
 		Point bordersSize = getBordersSize(vertical);
 		int shellWidthHint;
@@ -319,6 +322,8 @@ public abstract class ResizableSkin implements BrowserSimSkin {
 		deviceComposite.setNavBarCompositeVisible(navBarVisible);
 		deviceComposite.setMenu(contextMenu);
 	}
+	
+	
 	
 	@Override
 	public void statusTextChanged(String newStatusText) {
@@ -359,7 +364,7 @@ public abstract class ResizableSkin implements BrowserSimSkin {
 	}
 	
 	protected abstract DeviceComposite createDeviceComposite(Composite parent, boolean vertical);
-	
+		
 	private int[] getNormalRegion(boolean vertical) {
 		return vertical ? visibleRegionVertical : visibleRegionHorizontal;
 	}

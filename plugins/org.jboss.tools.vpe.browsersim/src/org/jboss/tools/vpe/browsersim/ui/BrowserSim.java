@@ -59,6 +59,7 @@ import org.jboss.tools.vpe.browsersim.ui.events.ExitListener;
 import org.jboss.tools.vpe.browsersim.ui.events.SkinChangeEvent;
 import org.jboss.tools.vpe.browsersim.ui.events.SkinChangeListener;
 import org.jboss.tools.vpe.browsersim.ui.menu.BrowserSimMenuCreator;
+import org.jboss.tools.vpe.browsersim.ui.skin.AutomaticAdressBarHideable;
 import org.jboss.tools.vpe.browsersim.ui.skin.BrowserSimSkin;
 import org.jboss.tools.vpe.browsersim.ui.skin.ResizableSkinSizeAdvisor;
 import org.jboss.tools.vpe.browsersim.ui.skin.ResizableSkinSizeAdvisorImpl;
@@ -154,6 +155,7 @@ public class BrowserSim {
 		Display display = Display.getDefault();
 		
 		skin.createControls(display, location, parentShell);
+		skin.setAddressBarVisible(isAddressBarVisibleByDefault());
 		currentLocation = location;
 		
 		final Shell shell = skin.getShell();
@@ -262,53 +264,10 @@ public class BrowserSim {
 				@Override
 				public void changed(LocationEvent event) {
 					Browser browser = (Browser) event.widget;
-					setCustomScrollbarStyles(browser);
+					BrowserSimUtil.setCustomScrollbarStyles(browser);
 				}
-
-				@SuppressWarnings("nls")
-				private void setCustomScrollbarStyles(Browser browser) {
 				
-					browser.execute(
-						"if (window._browserSim_customScrollBarStylesSetter === undefined) {"
-							+"window._browserSim_customScrollBarStylesSetter = function () {"
-							+	"document.removeEventListener('DOMSubtreeModified', window._browserSim_customScrollBarStylesSetter, false);"
-							+	"var head = document.head;"
-							+	"var style = document.createElement('style');"
-							+	"style.type = 'text/css';"
-							+	"style.id='browserSimStyles';"
-							+	"head.appendChild(style);"
-							+	"style.innerText='"
-							// The following two rules fix a problem with showing scrollbars in Google Mail and similar,
-							// but autohiding of navigation bar stops to work with it. That is why they are commented.
-							//+	"html {"
-							//+		"overflow: hidden;"
-							//+	"}"
-							//+	"body {"
-							//+		"position: absolute;"
-							//+		"top: 0px;"
-							//+		"left: 0px;"
-							//+		"bottom: 0px;"
-							//+		"right: 0px;"
-							//+		"margin: 0px;"
-							//+		"overflow-y: auto;"
-							//+		"overflow-x: auto;"
-							//+	"}"
-							+		"::-webkit-scrollbar {"
-							+			"width: 5px;"
-							+			"height: 5px;"
-							+		"}"
-							+		"::-webkit-scrollbar-thumb {"
-							+			"background: rgba(0,0,0,0.4); "
-							+		"}"
-							+		"::-webkit-scrollbar-corner, ::-webkit-scrollbar-thumb:window-inactive {"
-							+			"background: rgba(0,0,0,0.0);"
-							+		"};"
-							+	"';"
-							+"};"
-							+ "document.addEventListener('DOMSubtreeModified', window._browserSim_customScrollBarStylesSetter, false);"
-						+ "}"
-					);
-				}
+
 			});
 		};
 
@@ -337,7 +296,11 @@ public class BrowserSim {
 							skin.getShell().getDisplay().asyncExec(new Runnable() {
 								public void run() {
 									if (skin != null && skin.getShell() != null && !skin.getShell().isDisposed()) {
-										skin.setAddressBarVisible(false);
+										if (skin instanceof AutomaticAdressBarHideable) {
+											if (((AutomaticAdressBarHideable) skin).automaticallyHideAddressBar()) {
+												skin.setAddressBarVisible(false);
+											}
+										}
 									}
 								}
 							});
@@ -362,7 +325,11 @@ public class BrowserSim {
 			}
 			
 			public void changing(LocationEvent event) {
-				skin.setAddressBarVisible(true);
+				if (skin instanceof AutomaticAdressBarHideable) {
+					if (((AutomaticAdressBarHideable) skin).automaticallyHideAddressBar() && isAddressBarVisibleByDefault()) {
+						skin.setAddressBarVisible(true);
+					}
+				}
 			}
 		});
 
@@ -417,14 +384,15 @@ public class BrowserSim {
 		});
 	}
 
-	private void setSelectedDevice(Boolean refreshRequired) {
+	protected void setSelectedDevice(Boolean refreshRequired) {
 		final Device device = commonPreferences.getDevices().get(specificPreferences.getSelectedDeviceId());
 		if (device == null) {
 			skin.getShell().close();
 		} else {
 			Class<? extends BrowserSimSkin> newSkinClass = BrowserSimUtil.getSkinClass(device, specificPreferences.getUseSkins());
+			boolean needToChangeSkin = newSkinClass != skin.getClass();
 			String oldSkinUrl = null;
-			if (newSkinClass != skin.getClass()) {
+			if (needToChangeSkin) {
 				oldSkinUrl = skin.getBrowser().getUrl();
 				Point currentLocation = skin.getShell().getLocation();
 				skin.getBrowser().removeProgressListener(progressListener);
@@ -434,13 +402,17 @@ public class BrowserSim {
 			}
 			setOrientation(specificPreferences.getOrientationAngle(), device);
 			skin.getBrowser().setDefaultUserAgent(device.getUserAgent());
-	
-			if (oldSkinUrl != null) {
-				skin.getBrowser().setUrl(oldSkinUrl); // skin (and browser instance) is changed
-			} else if(!Boolean.FALSE.equals(refreshRequired)){
-				getBrowser().refresh(); // only user agent and size of the browser is changed and orientation is not changed
-	 		}
 			
+			if (needToChangeSkin) {
+				if (oldSkinUrl != null && isUrlResettingNeededAfterSkinChange()) {
+					skin.getBrowser().setUrl(oldSkinUrl); // skin (and browser instance) is changed
+				}
+			} else {
+				if (!Boolean.FALSE.equals(refreshRequired)) {
+					getBrowser().refresh(); // only user agent and size of the browser is changed and orientation is not changed
+				}
+			}
+
 			processLiveReload(specificPreferences.isEnableLiveReload());
 			processTouchEvents(specificPreferences.isEnableTouchEvents());
 	
@@ -448,6 +420,10 @@ public class BrowserSim {
 		} 
 	} 
 	
+	protected boolean isUrlResettingNeededAfterSkinChange() {
+		return true; // JBIDE-14636
+	}
+
 	public void reinitSkin() {
 		final Device device = commonPreferences.getDevices().get(specificPreferences.getSelectedDeviceId());
 		Class<? extends BrowserSimSkin> newSkinClass = BrowserSimUtil.getSkinClass(device, specificPreferences.getUseSkins());
@@ -561,8 +537,16 @@ public class BrowserSim {
 		}
 	}
 	
+	public Device getCurrentDevice() {
+		return commonPreferences.getDevices().get(specificPreferences.getSelectedDeviceId());
+	}
+	
 	public static List<BrowserSim> getInstances() {
 		return instances;
+	}
+	
+	protected boolean isAddressBarVisibleByDefault() {
+		return true;
 	}
 
 	/**
