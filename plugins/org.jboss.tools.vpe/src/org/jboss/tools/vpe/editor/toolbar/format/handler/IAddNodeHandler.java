@@ -12,7 +12,7 @@ package org.jboss.tools.vpe.editor.toolbar.format.handler;
 
 import org.w3c.dom.Node;
 
-import org.jboss.tools.jst.jsp.selection.SelectedNodeInfo;
+import org.jboss.tools.jst.web.ui.internal.editor.selection.SelectedNodeInfo;
 import org.jboss.tools.vpe.editor.template.textformating.FormatData;
 
 /**

@@ -32,11 +32,11 @@ import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.handlers.RegistryToggleState;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.bundle.BundleMap;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditorPart;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditorPart;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.base.test.TestUtil;
 import org.jboss.tools.vpe.base.test.VpeTest;
 import org.jboss.tools.vpe.editor.VpeController;
@@ -79,7 +79,7 @@ public class VpeCommandsTests extends VpeTest {
 				ShowNonVisualTagsHandler.COMMAND_ID,
 				ShowTextFormattingHandler.COMMAND_ID };
 
-		preferences = JspEditorPlugin.getDefault().getPreferenceStore();
+		preferences = WebUiPlugin.getDefault().getPreferenceStore();
 		VPE_PREF_COMMANDS_STATES = new HashMap<String, Boolean>();
 
 		boolean showBorderToogleState = preferences

@@ -12,8 +12,8 @@ package org.jboss.tools.vpe.editor.template;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.swt.graphics.Point;
-import org.jboss.tools.jst.jsp.editor.ITextFormatter;
-import org.jboss.tools.jst.jsp.selection.SourceSelection;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.ITextFormatter;
+import org.jboss.tools.jst.web.ui.internal.editor.selection.SourceSelection;
 import org.jboss.tools.vpe.editor.VpeSourceDropInfo;
 import org.jboss.tools.vpe.editor.VpeSourceInnerDragInfo;
 import org.jboss.tools.vpe.editor.context.VpePageContext;

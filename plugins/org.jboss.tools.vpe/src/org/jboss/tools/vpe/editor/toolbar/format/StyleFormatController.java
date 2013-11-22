@@ -14,7 +14,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.PlatformUI;
-import org.jboss.tools.jst.css.dialog.CSSStyleDialog;
+import org.jboss.tools.jst.web.ui.internal.css.dialog.CSSStyleDialog;
 import org.jboss.tools.vpe.editor.template.textformating.FormatAttributeData;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;

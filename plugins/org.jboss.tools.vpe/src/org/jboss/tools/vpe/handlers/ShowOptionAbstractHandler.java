@@ -16,8 +16,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.vpe.editor.VpeController;
 
 /**
@@ -34,7 +34,7 @@ public abstract class ShowOptionAbstractHandler extends VisualPartAbstractHandle
 		/*
 		 * Save new state into PreferenceStore
 		 */
-		JspEditorPlugin.getDefault().getPreferenceStore()
+		WebUiPlugin.getDefault().getPreferenceStore()
 				.setValue(getPreferenceKey(),toggleState);
 		
 		IEditorReference[] openedEditors = PlatformUI.getWorkbench()

@@ -13,9 +13,9 @@ package org.jboss.tools.vpe.editor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
-import org.jboss.tools.jst.jsp.bundle.BundleMap;
-import org.jboss.tools.jst.jsp.editor.IVisualEditor;
-import org.jboss.tools.jst.jsp.editor.IVisualEditorFactory;
+import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditorFactory;
 
 public class VpeEditorPartFactory implements IVisualEditorFactory {
 

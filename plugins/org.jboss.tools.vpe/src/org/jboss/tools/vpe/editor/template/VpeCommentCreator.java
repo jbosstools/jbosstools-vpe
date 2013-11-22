@@ -12,7 +12,7 @@ package org.jboss.tools.vpe.editor.template;
 
 import java.util.Map;
 
-import org.jboss.tools.jst.jsp.preferences.VpePreference;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.VpePreference;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.util.HTML;
 import org.mozilla.interfaces.nsIDOMDocument;

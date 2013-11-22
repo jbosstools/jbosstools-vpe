@@ -22,9 +22,9 @@ import org.eclipse.wst.xml.core.internal.document.TextImpl;
 import org.w3c.dom.Node;
 
 import org.jboss.tools.common.reporting.ProblemReportingHelper;
-import org.jboss.tools.jst.jsp.selection.SourceSelectionBuilder;
-import org.jboss.tools.jst.jsp.selection.SourceSelection;
-import org.jboss.tools.jst.jsp.selection.SelectedNodeInfo;
+import org.jboss.tools.jst.web.ui.internal.editor.selection.SourceSelectionBuilder;
+import org.jboss.tools.jst.web.ui.internal.editor.selection.SourceSelection;
+import org.jboss.tools.jst.web.ui.internal.editor.selection.SelectedNodeInfo;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeController;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;

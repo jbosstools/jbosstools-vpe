@@ -12,7 +12,7 @@ package org.jboss.tools.vpe.html.template;
 
 import static org.jboss.tools.vpe.xulrunner.util.XPCOM.queryInterface;
 
-import org.jboss.tools.jst.jsp.preferences.VpePreference;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.VpePreference;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.template.VpeAbstractTemplate;
 import org.jboss.tools.vpe.editor.template.VpeCreationData;

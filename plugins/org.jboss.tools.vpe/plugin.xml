@@ -123,7 +123,7 @@
 			sequence="M1+R"/>
 	</extension>
   <extension
-        point="org.jboss.tools.jst.jsp.visulaEditorImplementations"  id="org.jboss.tools.vpe.editor.VpeEditorPartFactory">
+        point="org.jboss.tools.jst.web.ui.visulaEditorImplementations"  id="org.jboss.tools.vpe.editor.VpeEditorPartFactory">
         	<visualEditorImplementation name="%visualEditorImpl_name" class="org.jboss.tools.vpe.editor.VpeEditorPartFactory"/>
   </extension>
   	<extension point="org.eclipse.core.expressions.definitions">

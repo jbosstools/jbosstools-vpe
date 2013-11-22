@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.7.0",
  org.jboss.tools.vpe,
  org.mozilla.xpcom,
  org.eclipse.core.resources;bundle-version="3.7.100",
- org.jboss.tools.jst.jsp,
+ org.jboss.tools.jst.web.ui,
  org.jboss.tools.common
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

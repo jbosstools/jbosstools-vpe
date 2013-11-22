@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 import org.jboss.tools.common.model.ui.util.StringUtil;
 import org.jboss.tools.common.model.util.XMLUtil;
 import org.jboss.tools.common.xml.XMLUtilities;
-import org.jboss.tools.jst.css.common.CSSStyleManager;
+import org.jboss.tools.jst.web.ui.internal.css.common.CSSStyleManager;
 import org.jboss.tools.vpe.editor.util.Constants;
 import org.jboss.tools.vpe.editor.util.HTML;
 import org.jboss.tools.vpe.editor.util.VpeStyleUtil;

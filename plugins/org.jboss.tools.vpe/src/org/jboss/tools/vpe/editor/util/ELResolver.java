@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.jboss.tools.common.resref.core.ResourceReference;
-import org.jboss.tools.jst.jsp.bundle.BundleMapUtil;
+import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMapUtil;
 import org.jboss.tools.jst.web.tld.TaglibData;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.context.VpePageContext;

@@ -11,8 +11,8 @@
 package org.jboss.tools.vpe.editor.toolbar;
 
 import org.eclipse.core.expressions.PropertyTester;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 
 /**
  * @author mareshkau
@@ -22,7 +22,7 @@ public class VPEPropertyTester extends PropertyTester{
 
 	public boolean test(Object receiver, String property, Object[] args,
 			Object expectedValue) {
-		return !JspEditorPlugin.getDefault().getPreferenceStore()
+		return !WebUiPlugin.getDefault().getPreferenceStore()
 		.getBoolean(IVpePreferencesPage.SHOW_VISUAL_TOOLBAR);
 	}
 }

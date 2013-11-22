@@ -22,9 +22,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.menus.UIElement;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
 import org.jboss.tools.vpe.editor.toolbar.IVpeToolBarManager;
@@ -43,7 +43,7 @@ public class ShowTextFormattingHandler extends VisualPartAbstractHandler {
 
 		boolean toggleState = !HandlerUtil.toggleCommandState(event
 				.getCommand());
-		JspEditorPlugin
+		WebUiPlugin
 				.getDefault()
 				.getPreferenceStore()
 				.setValue(IVpePreferencesPage.SHOW_TEXT_FORMATTING,

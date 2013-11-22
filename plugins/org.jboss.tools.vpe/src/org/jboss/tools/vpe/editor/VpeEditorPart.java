@@ -65,14 +65,14 @@ import org.jboss.tools.common.model.event.XModelTreeEvent;
 import org.jboss.tools.common.model.event.XModelTreeListener;
 import org.jboss.tools.common.model.ui.editor.IModelObjectEditorInput;
 import org.jboss.tools.common.model.ui.util.ModelUtilities;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.bundle.BundleMap;
-import org.jboss.tools.jst.jsp.editor.IVisualEditor;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
-import org.jboss.tools.jst.jsp.jspeditor.StorageRevisionEditorInputAdapter;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
-import org.jboss.tools.jst.jsp.preferences.VpePreference;
-import org.jboss.tools.jst.jsp.selection.bar.SelectionBar;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.StorageRevisionEditorInputAdapter;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.VpePreference;
+import org.jboss.tools.jst.web.ui.internal.editor.selection.bar.SelectionBar;
 import org.jboss.tools.vpe.IVpeHelpContextIds;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
@@ -229,7 +229,7 @@ public class VpeEditorPart extends EditorPart implements
 			 */
 //			selectionBar.setVisible(selectionBar.getAlwaysVisibleOption());
 //			setVerticalToolbarVisible(true);
-			setVerticalToolbarVisible(JspEditorPlugin.getDefault().getPreferenceStore()
+			setVerticalToolbarVisible(WebUiPlugin.getDefault().getPreferenceStore()
 					.getBoolean(IVpePreferencesPage.SHOW_VISUAL_TOOLBAR));
 			/*
 			 * Fixes https://jira.jboss.org/jira/browse/JBIDE-3140
@@ -438,14 +438,14 @@ public class VpeEditorPart extends EditorPart implements
 		 * Editors orientation is based on preference's settings.
 		 */
 		container = new CustomSashForm(cmpEd, CustomSashForm
-			.getSplittingDirection(JspEditorPlugin.getDefault().getPreferenceStore()
+			.getSplittingDirection(WebUiPlugin.getDefault().getPreferenceStore()
 					.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING)));
 		if (editorSettings != null) {
 		    editorSettings.addSetting(new SashSetting(container));
 		}
 
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		if (CustomSashForm.isSourceEditorFirst(JspEditorPlugin.getDefault().getPreferenceStore()
+		if (CustomSashForm.isSourceEditorFirst(WebUiPlugin.getDefault().getPreferenceStore()
 				.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING))) {
 		    sourceContent = new Composite(container, SWT.NONE);
 		    visualContent = new Composite(container, SWT.NONE);
@@ -658,7 +658,7 @@ public class VpeEditorPart extends EditorPart implements
 		};
 		container.addCustomSashFormListener(new ICustomSashFormListener() {
 			public void dividerMoved(int firstControlWeight, int secondControlWeight) {
-				JspEditorPlugin.getDefault().getPreferenceStore().
+				WebUiPlugin.getDefault().getPreferenceStore().
 				setValue(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_WEIGHTS, secondControlWeight);
 			}
 		});
@@ -687,7 +687,7 @@ public class VpeEditorPart extends EditorPart implements
 		if (useCurrentEditorSettings) {
 			splitting = currentOrientation;
 		} else {
-			splitting = JspEditorPlugin.getDefault().getPreferenceStore()
+			splitting = WebUiPlugin.getDefault().getPreferenceStore()
 				.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING);
 		}
 		CustomSashForm newContainer = new CustomSashForm(cmpEd, CustomSashForm
@@ -734,7 +734,7 @@ public class VpeEditorPart extends EditorPart implements
 		/*
 		 * Set up new sash weights
 		 */
-		int defaultWeight = JspEditorPlugin.getDefault().getPreferenceStore()
+		int defaultWeight = WebUiPlugin.getDefault().getPreferenceStore()
 			.getInt(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_WEIGHTS);
 		int[] weights = container.getWeights();
 		if (useCurrentEditorSettings) {
@@ -1046,7 +1046,7 @@ public class VpeEditorPart extends EditorPart implements
 
 	public void maximizeSource() {
 		if (container != null) {
-			if (CustomSashForm.isSourceEditorFirst(JspEditorPlugin.getDefault().getPreferenceStore()
+			if (CustomSashForm.isSourceEditorFirst(WebUiPlugin.getDefault().getPreferenceStore()
 					.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING))) {
 				container.maxDown();
 			} else {
@@ -1063,7 +1063,7 @@ public class VpeEditorPart extends EditorPart implements
 	
 	public void maximizeVisual() {
 		if (container != null) {
-			if (CustomSashForm.isSourceEditorFirst(JspEditorPlugin.getDefault().getPreferenceStore()
+			if (CustomSashForm.isSourceEditorFirst(WebUiPlugin.getDefault().getPreferenceStore()
 					.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING))) {
 				container.maxUp();
 			} else {
@@ -1116,7 +1116,7 @@ public class VpeEditorPart extends EditorPart implements
 		 */
 		if (getController() != null) {
 			boolean doVisualRefresh = false;
-			boolean presfShowBorderForUnknownTags = JspEditorPlugin.getDefault().getPreferenceStore()
+			boolean presfShowBorderForUnknownTags = WebUiPlugin.getDefault().getPreferenceStore()
 					.getBoolean(IVpePreferencesPage.SHOW_BORDER_FOR_UNKNOWN_TAGS);
 			if (presfShowBorderForUnknownTags != getController().getVisualBuilder().isShowBorderForUnknownTags()) {
 				/*
@@ -1126,11 +1126,11 @@ public class VpeEditorPart extends EditorPart implements
 				doVisualRefresh = true;
 			}
 			
-			RGB rgb = StringConverter.asRGB(JspEditorPlugin.getDefault().getPreferenceStore()
+			RGB rgb = StringConverter.asRGB(WebUiPlugin.getDefault().getPreferenceStore()
 					.getString(IVpePreferencesPage.SELECTION_VISIBLE_BORDER_COLOR));
 			visualEditor.getXulRunnerEditor().setVisibleSelectedElementColor(VpeStyleUtil.rgbToString(rgb));
 
-			rgb = StringConverter.asRGB(JspEditorPlugin.getDefault().getPreferenceStore()
+			rgb = StringConverter.asRGB(WebUiPlugin.getDefault().getPreferenceStore()
 					.getString(IVpePreferencesPage.SELECTION_HIDDEN_BORDER_COLOR));
 			visualEditor.getXulRunnerEditor().setHiddenSelectedElementColor(VpeStyleUtil.rgbToString(rgb));
 			
@@ -1139,21 +1139,21 @@ public class VpeEditorPart extends EditorPart implements
 //				doVisualRefresh = true;
 //			}
 	
-			boolean prefsShowNonVisualTags = JspEditorPlugin.getDefault().getPreferenceStore()
+			boolean prefsShowNonVisualTags = WebUiPlugin.getDefault().getPreferenceStore()
 					.getBoolean(IVpePreferencesPage.SHOW_NON_VISUAL_TAGS);
 			if (prefsShowNonVisualTags != getController().getVisualBuilder().isShowInvisibleTags()) {
 				getController().getVisualBuilder().setShowInvisibleTags(prefsShowNonVisualTags);
 				doVisualRefresh = true;
 			}
 			
-			boolean prefsShowBundlesAsEL = JspEditorPlugin.getDefault().getPreferenceStore()
+			boolean prefsShowBundlesAsEL = WebUiPlugin.getDefault().getPreferenceStore()
 					.getBoolean(IVpePreferencesPage.SHOW_RESOURCE_BUNDLES_USAGE_AS_EL);
 			if (prefsShowBundlesAsEL != getController().getPageContext().getBundle().isShowBundleUsageAsEL()) {
 				getController().getPageContext().getBundle().updateShowBundleUsageAsEL(prefsShowBundlesAsEL);
 				doVisualRefresh = true;
 			}
 			
-			boolean prefsShowVPEToolBar = JspEditorPlugin.getDefault().getPreferenceStore()
+			boolean prefsShowVPEToolBar = WebUiPlugin.getDefault().getPreferenceStore()
 					.getBoolean(IVpePreferencesPage.SHOW_VISUAL_TOOLBAR);
 			setVerticalToolbarVisible(prefsShowVPEToolBar);
 			

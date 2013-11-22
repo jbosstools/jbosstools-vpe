@@ -37,8 +37,8 @@ import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.jboss.tools.common.resref.core.ResourceReference;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
@@ -141,9 +141,9 @@ public class VpeVisualDomBuilder extends VpeDomBuilder {
 		this.visualEditor = visualEditor;
 		xulRunnerEditor = visualEditor.getXulRunnerEditor();
 		this.pageContext = pageContext;
-		this.showInvisibleTags = JspEditorPlugin.getDefault().getPreferenceStore().getBoolean(
+		this.showInvisibleTags = WebUiPlugin.getDefault().getPreferenceStore().getBoolean(
 				IVpePreferencesPage.SHOW_NON_VISUAL_TAGS);
-		this.showBorderForUnknownTags = JspEditorPlugin.getDefault().getPreferenceStore().getBoolean(
+		this.showBorderForUnknownTags = WebUiPlugin.getDefault().getPreferenceStore().getBoolean(
 				IVpePreferencesPage.SHOW_BORDER_FOR_UNKNOWN_TAGS);
 	}
 

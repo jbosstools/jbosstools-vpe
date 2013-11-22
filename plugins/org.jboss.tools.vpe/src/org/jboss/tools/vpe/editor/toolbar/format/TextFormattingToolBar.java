@@ -26,8 +26,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.jboss.tools.jst.css.CSSPlugin;
-import org.jboss.tools.jst.css.dialog.common.Util;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.css.dialog.common.Util;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
 import org.jboss.tools.vpe.editor.toolbar.SplitToolBar;
@@ -177,7 +177,7 @@ public class TextFormattingToolBar extends SplitToolBar {
 		 * CSSStyleDialog should be on the Formatting toolbar.
 		 */
 		item = createToolItem(toolBar, SWT.PUSH, 
-				createImage(CSSPlugin.getImageDescriptor(Util.IMAGE_COLORLARGE_FILE_LOCATION)), 
+				createImage(WebUiPlugin.getImageDescriptor(Util.IMAGE_COLORLARGE_FILE_LOCATION)), 
 				VpeUIMessages.EDIT_STYLE_ATTRIBUTE);
 		listener = new StyleFormatController(formatControllerManager, item);
 		item.addListener(SWT.Selection, listener);
