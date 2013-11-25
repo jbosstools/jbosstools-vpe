@@ -13,8 +13,8 @@ package org.jboss.tools.vpe.handlers;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 
 /**
  * Class that set flag for synchronize scrolling between source and visual panes 
@@ -28,7 +28,7 @@ public class ScrollLockSourceVisualHandler extends VisualPartAbstractHandler {
 		/*
 		 * Change the enabled state, listeners in VpeController will do the rest
 		 */
-		JspEditorPlugin.getDefault().getPreferenceStore().setValue(
+		WebUiPlugin.getDefault().getPreferenceStore().setValue(
 				IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES,
 						!HandlerUtil.toggleCommandState(event.getCommand()));
 		return null;

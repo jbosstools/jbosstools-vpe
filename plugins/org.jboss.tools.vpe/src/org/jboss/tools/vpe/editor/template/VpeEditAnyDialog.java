@@ -16,8 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -40,10 +42,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.model.ui.ModelUIImages;
-import org.jboss.tools.jst.css.CSSPlugin;
-import org.jboss.tools.jst.css.dialog.CSSStyleDialog;
-import org.jboss.tools.jst.css.dialog.common.Util;
-import org.jboss.tools.jst.jsp.util.Constants;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.css.dialog.CSSStyleDialog;
+import org.jboss.tools.jst.web.ui.internal.css.dialog.common.Util;
+import org.jboss.tools.jst.web.ui.internal.editor.util.Constants;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.Message;
 import org.jboss.tools.vpe.editor.template.expression.VpeExpressionBuilder;
@@ -236,7 +238,7 @@ public class VpeEditAnyDialog extends TitleAreaDialog {
 		Button button = new Button(composite, SWT.PUSH);
 		button.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, false, false, 1, 1));
 		button.setToolTipText(VpeUIMessages.EDIT_STYLE_TIP);
-		ImageDescriptor colorDesc = CSSPlugin
+		ImageDescriptor colorDesc = WebUiPlugin
 			.getImageDescriptor(Util.IMAGE_COLORLARGE_FILE_LOCATION);
 		Image im = colorDesc.createImage();
 		button.setImage(im);

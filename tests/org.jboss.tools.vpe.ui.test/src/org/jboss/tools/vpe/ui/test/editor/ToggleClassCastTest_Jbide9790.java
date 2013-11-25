@@ -19,7 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jst.jsp.core.internal.domdocument.ElementImplForJSP;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.vpe.base.test.TestUtil;
 import org.jboss.tools.vpe.base.test.VpeTest;
 import org.jboss.tools.vpe.editor.VpeController;

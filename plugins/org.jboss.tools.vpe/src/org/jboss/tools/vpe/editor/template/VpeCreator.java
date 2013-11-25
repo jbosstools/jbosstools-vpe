@@ -12,8 +12,8 @@ package org.jboss.tools.vpe.editor.template;
 
 import java.util.Map;
 
-import org.jboss.tools.jst.jsp.editor.ITextFormatter;
-import org.jboss.tools.jst.jsp.selection.SourceSelection;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.ITextFormatter;
+import org.jboss.tools.jst.web.ui.internal.editor.selection.SourceSelection;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.template.expression.VpeExpressionException;
 import org.mozilla.interfaces.nsIDOMDocument;

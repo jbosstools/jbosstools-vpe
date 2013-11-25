@@ -45,7 +45,7 @@ import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.jboss.tools.common.model.ui.dnd.ModelTransfer;
 import org.jboss.tools.common.model.ui.editors.dnd.context.DropContext;
 import org.jboss.tools.common.util.SwtUtil;
-import org.jboss.tools.jst.jsp.editor.IJSPTextEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.IJSPTextEditor;
 import org.jboss.tools.vpe.editor.dnd.context.JSPViewerDropAdapter;
 import org.w3c.dom.Node;
 

@@ -19,7 +19,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.jboss.tools.common.model.XModelException;
 import org.jboss.tools.common.model.ui.dnd.DnDUtil;
 import org.jboss.tools.common.model.ui.editor.IModelObjectEditorInput;
-import org.jboss.tools.jst.jsp.jspeditor.dnd.JSPPaletteInsertHelper;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.dnd.JSPPaletteInsertHelper;
 import org.jboss.tools.vpe.VpePlugin;
 import org.mozilla.interfaces.nsIFile;
 import org.mozilla.interfaces.nsISupports;

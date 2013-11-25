@@ -20,8 +20,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.VpePlugin;
 
 /**
@@ -81,7 +81,7 @@ public class VpeToolBarManager implements IVpeToolBarManager {
 		ToolbarContainer toolbarContainer = new ToolbarContainer(cmpToolBar, bar);
 
 		// show or hide toolbar
-		setStateToolbar(cmpToolBar, JspEditorPlugin.getDefault().getPreferenceStore().getBoolean(
+		setStateToolbar(cmpToolBar, WebUiPlugin.getDefault().getPreferenceStore().getBoolean(
 				IVpePreferencesPage.SHOW_TEXT_FORMATTING));
 
 	}

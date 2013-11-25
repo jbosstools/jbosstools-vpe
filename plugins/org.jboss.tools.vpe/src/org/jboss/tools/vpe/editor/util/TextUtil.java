@@ -22,7 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.swt.graphics.Point;
-import org.jboss.tools.jst.jsp.util.NodesManagingUtil;
+import org.jboss.tools.jst.web.ui.internal.editor.util.NodesManagingUtil;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.mozilla.interfaces.nsIDOMKeyEvent;

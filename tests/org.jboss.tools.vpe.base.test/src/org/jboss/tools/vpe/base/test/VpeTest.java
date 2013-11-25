@@ -34,9 +34,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeController;
 import org.jboss.tools.vpe.editor.VpeSourceDomBuilder;
@@ -71,7 +71,7 @@ public class VpeTest extends TestCase implements ILogListener {
 
 	// FIX for JBIDE-1628
 	static {
-		JspEditorPlugin.getDefault().getPreferenceStore().setValue(
+		WebUiPlugin.getDefault().getPreferenceStore().setValue(
 			IVpePreferencesPage.INFORM_WHEN_PROJECT_MIGHT_NOT_BE_CONFIGURED_PROPERLY_FOR_VPE,
 			false);
 	}

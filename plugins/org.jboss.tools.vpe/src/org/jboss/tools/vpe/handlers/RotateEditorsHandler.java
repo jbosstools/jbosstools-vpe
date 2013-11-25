@@ -26,9 +26,9 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.menus.UIElement;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeController;
 import org.jboss.tools.vpe.messages.VpeUIMessages;
@@ -86,7 +86,7 @@ public class RotateEditorsHandler extends VisualPartAbstractHandler{
 	 * from the application context.
 	 */
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IPreferenceStore preferences = JspEditorPlugin.getDefault().getPreferenceStore();
+		IPreferenceStore preferences = WebUiPlugin.getDefault().getPreferenceStore();
 		String orientation = preferences.getString
 				(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING);
 		int currentOrientationIndex = layoutValues.indexOf(orientation);
@@ -117,7 +117,7 @@ public class RotateEditorsHandler extends VisualPartAbstractHandler{
 	}
 
 	public void updateElement(UIElement element, Map parameters) {
-		IPreferenceStore preferences = JspEditorPlugin.getDefault().getPreferenceStore();
+		IPreferenceStore preferences = WebUiPlugin.getDefault().getPreferenceStore();
 		String orientation = preferences.getString(
 				IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING);
 		if (orientation.isEmpty()) {

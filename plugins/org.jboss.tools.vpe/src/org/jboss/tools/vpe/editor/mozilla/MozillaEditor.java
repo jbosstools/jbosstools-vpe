@@ -64,12 +64,12 @@ import org.eclipse.ui.editors.text.ILocationProvider;
 import org.eclipse.ui.internal.part.StatusPart;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.statushandlers.StatusAdapter;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.i18n.ExternalizeStringsDialog;
-import org.jboss.tools.jst.jsp.i18n.ExternalizeStringsUtils;
-import org.jboss.tools.jst.jsp.i18n.ExternalizeStringsWizard;
-import org.jboss.tools.jst.jsp.messages.JstUIMessages;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.i18n.ExternalizeStringsDialog;
+import org.jboss.tools.jst.web.ui.internal.editor.i18n.ExternalizeStringsUtils;
+import org.jboss.tools.jst.web.ui.internal.editor.i18n.ExternalizeStringsWizard;
+import org.jboss.tools.jst.web.ui.internal.editor.messages.JstUIMessages;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeController;
 import org.jboss.tools.vpe.editor.mozilla.listener.EditorLoadWindowListener;
@@ -307,7 +307,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 		 * https://jira.jboss.org/jira/browse/JBIDE-4152
 		 * Compute initial icon state and add it to the tool bar.
 		 */
-		String newOrientation = JspEditorPlugin
+		String newOrientation = WebUiPlugin
 		.getDefault().getPreferenceStore().getString(
 				IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING);
 		currentOrientationIndex = layoutValues.indexOf(newOrientation);
@@ -336,7 +336,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				 * to redraw CustomSashForm with new layout.
 				 */
 				getController().getPageContext().getEditPart().fillContainer(true, newOrientation);
-				JspEditorPlugin.getDefault().getPreferenceStore().
+				WebUiPlugin.getDefault().getPreferenceStore().
 					setValue(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING, newOrientation);
 			}
 		};
@@ -361,7 +361,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				 * Update VPE
 				 */
 		        controller.visualRefresh();
-				JspEditorPlugin.getDefault().getPreferenceStore().
+		        WebUiPlugin.getDefault().getPreferenceStore().
 				setValue(IVpePreferencesPage.SHOW_BORDER_FOR_UNKNOWN_TAGS, this.isChecked());
 		    }
 		};
@@ -387,7 +387,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				 * Update VPE
 				 */
 				controller.visualRefresh();
-				JspEditorPlugin.getDefault().getPreferenceStore().
+				WebUiPlugin.getDefault().getPreferenceStore().
 				setValue(IVpePreferencesPage.SHOW_NON_VISUAL_TAGS, this.isChecked());
 			}
 		};
@@ -407,7 +407,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				 * Update Text Formatting Bar 
 				 */
 				vpeToolBarManager.setToolbarVisibility(this.isChecked());
-				JspEditorPlugin.getDefault().getPreferenceStore().
+				WebUiPlugin.getDefault().getPreferenceStore().
 				setValue(IVpePreferencesPage.SHOW_TEXT_FORMATTING, this.isChecked());
 			}
 		};
@@ -428,7 +428,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				 */
 				controller.getPageContext().getBundle().updateShowBundleUsageAsEL(this.isChecked());
 				controller.visualRefresh();
-				JspEditorPlugin.getDefault().getPreferenceStore().
+				WebUiPlugin.getDefault().getPreferenceStore().
 				setValue(IVpePreferencesPage.SHOW_RESOURCE_BUNDLES_USAGE_AS_EL, this.isChecked());
 			}
 		};
@@ -449,7 +449,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				/*
 				 * Change the enabled state, listeners in VpeController will do the rest
 				 */
-				JspEditorPlugin.getDefault().getPreferenceStore().setValue(
+				WebUiPlugin.getDefault().getPreferenceStore().setValue(
 						IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES,
 						this.isChecked());
 			}
@@ -496,7 +496,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				 * Update Selection Bar 
 				 */
 				controller.getPageContext().getEditPart().updateSelectionBar(this.isChecked());
-				JspEditorPlugin.getDefault().getPreferenceStore().
+				WebUiPlugin.getDefault().getPreferenceStore().
 					setValue(IVpePreferencesPage.SHOW_SELECTION_TAG_BAR, this.isChecked());
 			}
 		};
@@ -515,7 +515,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				}
 			}
 		};
-		JspEditorPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(selectionBarCloseListener);
+		WebUiPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(selectionBarCloseListener);
 		
 		showSelectionBarAction.setImageDescriptor(ImageDescriptor.createFromFile(MozillaEditor.class,
 				ICON_SELECTION_BAR));
@@ -799,7 +799,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 	}
 
 	public void dispose() {
-		JspEditorPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(selectionBarCloseListener);
+		WebUiPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(selectionBarCloseListener);
 		
 		if (vpeToolBarManager != null) {
 			vpeToolBarManager.dispose();
@@ -1105,22 +1105,22 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 	}
 	
 	public void updateToolbarItemsAccordingToPreferences() {
-		String prefsOrientation = JspEditorPlugin
+		String prefsOrientation = WebUiPlugin
 		.getDefault().getPreferenceStore().getString(
 				IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING);
 		int prefsOrientationIndex = layoutValues.indexOf(prefsOrientation);
 		
-		boolean prefsShowBorderForUnknownTags = JspEditorPlugin.getDefault().getPreferenceStore()
+		boolean prefsShowBorderForUnknownTags = WebUiPlugin.getDefault().getPreferenceStore()
 				.getBoolean(IVpePreferencesPage.SHOW_BORDER_FOR_UNKNOWN_TAGS);
-		boolean prefsShowNonVisualTags = JspEditorPlugin.getDefault().getPreferenceStore()
+		boolean prefsShowNonVisualTags = WebUiPlugin.getDefault().getPreferenceStore()
 				.getBoolean(IVpePreferencesPage.SHOW_NON_VISUAL_TAGS);
-		boolean prefsShowTextFormatting = JspEditorPlugin.getDefault().getPreferenceStore()
+		boolean prefsShowTextFormatting = WebUiPlugin.getDefault().getPreferenceStore()
 				.getBoolean(IVpePreferencesPage.SHOW_TEXT_FORMATTING);
-		boolean prefsShowSelectionBar = JspEditorPlugin.getDefault().getPreferenceStore()
+		boolean prefsShowSelectionBar = WebUiPlugin.getDefault().getPreferenceStore()
 				.getBoolean(IVpePreferencesPage.SHOW_SELECTION_TAG_BAR);
-		boolean prefsShowBundlesAsEL = JspEditorPlugin.getDefault().getPreferenceStore()
+		boolean prefsShowBundlesAsEL = WebUiPlugin.getDefault().getPreferenceStore()
 				.getBoolean(IVpePreferencesPage.SHOW_RESOURCE_BUNDLES_USAGE_AS_EL);
-		boolean scrollLockEditors = JspEditorPlugin.getDefault().getPreferenceStore()
+		boolean scrollLockEditors = WebUiPlugin.getDefault().getPreferenceStore()
 				.getBoolean(IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES);
 		
 		if (showBorderAction != null) {

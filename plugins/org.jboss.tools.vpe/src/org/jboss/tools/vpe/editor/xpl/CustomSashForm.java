@@ -39,8 +39,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Sash;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.messages.VpeUIMessages;
 
 /**
@@ -88,7 +88,7 @@ public class CustomSashForm extends SashForm {
 		    /*
 		     * Init the sash weight with the default value. 
 		     */
-			int defaultWeight = JspEditorPlugin.getDefault().getPreferenceStore()
+			int defaultWeight = WebUiPlugin.getDefault().getPreferenceStore()
 					.getInt(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_WEIGHTS);
 			if (defaultWeight > 0) {
 			    weight = defaultWeight;
@@ -383,7 +383,7 @@ public class CustomSashForm extends SashForm {
 							if (currentSashInfo.cursorOver != i) {
 								currentSashInfo.cursorOver = i;
 								currentSashInfo.sash.redraw();
-								String splitting = JspEditorPlugin.getDefault().getPreferenceStore()
+								String splitting = WebUiPlugin.getDefault().getPreferenceStore()
 									.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING);
 								switch (locs[ARROW_TYPE_INDEX]) {
 								case UP_ARROW:
@@ -1164,7 +1164,7 @@ public class CustomSashForm extends SashForm {
 	}
 	
 	public void changeOrientation() {
-		int prefsOrientation = getSplittingDirection(JspEditorPlugin.getDefault().getPreferenceStore()
+		int prefsOrientation = getSplittingDirection(WebUiPlugin.getDefault().getPreferenceStore()
 				.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING));
 		if (getOrientation() != prefsOrientation) {
 			setOrientation(prefsOrientation);

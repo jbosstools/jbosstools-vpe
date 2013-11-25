@@ -11,7 +11,7 @@
 
 package org.jboss.tools.vpe.handlers;
 
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.editor.VpeController;
 
 /**

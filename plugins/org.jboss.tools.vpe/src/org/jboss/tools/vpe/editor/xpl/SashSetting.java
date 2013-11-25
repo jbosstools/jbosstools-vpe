@@ -19,8 +19,8 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorPart;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 
 
  
@@ -52,11 +52,11 @@ public class SashSetting implements EditorSettings.ISetting {
 		/*
 		 * Set weights from the preference page
 		 */
-		int defaultWeight = JspEditorPlugin.getDefault().getPreferenceStore()
+		int defaultWeight = WebUiPlugin.getDefault().getPreferenceStore()
 				.getInt(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_WEIGHTS);
 		int[] weights = sash.getWeights();
 		if (weights.length > 2) {
-			String splitting = JspEditorPlugin.getDefault().getPreferenceStore()
+			String splitting = WebUiPlugin.getDefault().getPreferenceStore()
 			.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING); 
 			if (defaultWeight == 0) {
 				if (CustomSashForm.isSourceEditorFirst(splitting)) {

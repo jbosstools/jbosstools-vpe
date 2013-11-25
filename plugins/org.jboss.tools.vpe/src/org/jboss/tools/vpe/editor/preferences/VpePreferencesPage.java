@@ -26,11 +26,11 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.editor.IVisualEditor;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
-import org.jboss.tools.jst.jsp.selection.bar.SelectionBarHandler;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.internal.editor.selection.bar.SelectionBarHandler;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.handlers.ScrollLockSourceVisualHandler;
@@ -195,17 +195,17 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 					/*
 					 * https://issues.jboss.org/browse/JBIDE-10745
 					 */
-					boolean presfShowBorderForUnknownTags = JspEditorPlugin.getDefault()
+					boolean presfShowBorderForUnknownTags = WebUiPlugin.getDefault()
 							.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_BORDER_FOR_UNKNOWN_TAGS);
-					boolean prefsShowNonVisualTags = JspEditorPlugin.getDefault()
+					boolean prefsShowNonVisualTags = WebUiPlugin.getDefault()
 							.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_NON_VISUAL_TAGS);
-					boolean prefsShowSelectionBar = JspEditorPlugin.getDefault()
+					boolean prefsShowSelectionBar = WebUiPlugin.getDefault()
 							.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_SELECTION_TAG_BAR);
-					boolean prefsShowTextFormattingBar = JspEditorPlugin.getDefault()
+					boolean prefsShowTextFormattingBar = WebUiPlugin.getDefault()
 							.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_TEXT_FORMATTING);
-					boolean prefsShowBundlesAsEL = JspEditorPlugin.getDefault()
+					boolean prefsShowBundlesAsEL = WebUiPlugin.getDefault()
 							.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_RESOURCE_BUNDLES_USAGE_AS_EL);
-					boolean prefsSynchronizeScrolling = JspEditorPlugin.getDefault()
+					boolean prefsSynchronizeScrolling = WebUiPlugin.getDefault()
 							.getPreferenceStore().getBoolean(IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES);
 					
 					setCommandToggleState(ShowBorderHandler.COMMAND_ID, presfShowBorderForUnknownTags);
@@ -239,7 +239,7 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 
 	@Override
 	public IPreferenceStore getPreferenceStore() {
-		return JspEditorPlugin.getDefault().getPreferenceStore();
+		return WebUiPlugin.getDefault().getPreferenceStore();
 	}
 /**
  * Creates a layout group for vpe preferences

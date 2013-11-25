@@ -87,14 +87,14 @@ import org.jboss.tools.common.model.util.EclipseResourceUtil;
 import org.jboss.tools.common.model.util.XModelTreeListenerSWTSync;
 import org.jboss.tools.common.resref.core.ResourceReferenceListListener;
 import org.jboss.tools.common.util.SwtUtil;
-import org.jboss.tools.jst.jsp.JspEditorPlugin;
-import org.jboss.tools.jst.jsp.bundle.BundleMap;
-import org.jboss.tools.jst.jsp.editor.IJSPTextEditor;
-import org.jboss.tools.jst.jsp.editor.IVisualController;
-import org.jboss.tools.jst.jsp.jspeditor.dnd.JSPPaletteInsertHelper;
-import org.jboss.tools.jst.jsp.preferences.IVpePreferencesPage;
-import org.jboss.tools.jst.jsp.preferences.VpePreference;
-import org.jboss.tools.jst.jsp.selection.SelectionHelper;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.IJSPTextEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualController;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.dnd.JSPPaletteInsertHelper;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.VpePreference;
+import org.jboss.tools.jst.web.ui.internal.editor.selection.SelectionHelper;
 import org.jboss.tools.jst.web.model.helpers.WebAppHelper;
 import org.jboss.tools.jst.web.project.WebProject;
 import org.jboss.tools.jst.web.tld.URIConstants;
@@ -374,7 +374,7 @@ public class VpeController implements INodeAdapter,
 								 * when scrollMaxYVisual > 0
 								 */
 								int scrollMaxYVisual = windowInternal.getScrollMaxY();
-								if (JspEditorPlugin.getDefault().getPreferenceStore().getBoolean(
+								if (WebUiPlugin.getDefault().getPreferenceStore().getBoolean(
 										IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES)
 										&& !visualScrollEventFlag && !selectionManager.isUpdateSelectionEventPerformed()
 										&& editPart.getVisualMode() == VpeEditorPart.VISUALSOURCE_MODE
@@ -1130,7 +1130,7 @@ public class VpeController implements INodeAdapter,
 		 * The idea of visual scroll listener is to scroll src part when it is required 
 		 * (when src hasn't been scrolled to a proper position).  
 		 */
-		if (JspEditorPlugin.getDefault().getPreferenceStore().getBoolean(
+		if (WebUiPlugin.getDefault().getPreferenceStore().getBoolean(
 				IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES)
 				&& !sourceScrollEventFlag && !selectionManager.isUpdateSelectionEventPerformed()
 				&& editPart.getVisualMode() == VpeEditorPart.VISUALSOURCE_MODE) { // ignore internal event from source
