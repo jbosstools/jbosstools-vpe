@@ -11,17 +11,32 @@ import org.osgi.framework.Bundle;
 
 public class XULRunnerInitializer {
 
+	private static final String FALSE = "false"; //$NON-NLS-1$
+	private static final String SWT_GTK3 = "SWT_GTK3"; //$NON-NLS-1$
 	private static final String XULRUNNER_PATH = "org.eclipse.swt.browser.XULRunnerPath"; //$NON-NLS-1$
 	private static final String XULRUNNER_ENTRY = "/xulrunner"; //$NON-NLS-1$
 	
 	/* XXX: yradtsevich: these constants are duplicated
 	 * in XulRunnerBrowser, see JBIDE-9188 */
 	private static final String LOAD_XULRUNNER_SYSTEM_PROPERTY = "org.jboss.tools.vpe.loadxulrunner";//$NON-NLS-1$
-	private static boolean EMBEDDED_XULRUNNER_ENABLED = !"false".equals(System.getProperty(LOAD_XULRUNNER_SYSTEM_PROPERTY)); //$NON-NLS-1$ //$NON-NLS-2$
+	private static boolean EMBEDDED_XULRUNNER_ENABLED = !FALSE.equals(System.getProperty(LOAD_XULRUNNER_SYSTEM_PROPERTY));
 
 	static {
-		if (EMBEDDED_XULRUNNER_ENABLED) {
-			initializeXULRunner();
+		boolean initialize = EMBEDDED_XULRUNNER_ENABLED;
+		if (initialize) {
+			if (Platform.WS_GTK.equals(Platform.getWS())) {
+				String gtk3 = System.getProperty(SWT_GTK3);
+				if (gtk3 == null) {
+					gtk3 = System.getenv(SWT_GTK3);
+				}
+				if (!"0".equals(gtk3)) { //$NON-NLS-1$
+					System.setProperty(LOAD_XULRUNNER_SYSTEM_PROPERTY, FALSE);
+					initialize = false;
+				}
+			}
+			if (initialize) {
+				initializeXULRunner();
+			}
 		}
 	}
 
