@@ -13,6 +13,7 @@
 	<packaging>pom</packaging>
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/jbosstools/jbosstools-vpe.git</tycho.scmUrl>
+    <xulrunner-site>http://download.jboss.org/jbosstools/updates/integration/kepler/core/xulrunner/1.9.2.Experimental-v20131218-0930-JBIDE-16280/</xulrunner-site>
 	</properties>
 	<modules>
 		<module>win32_win32_x86</module>
@@ -56,5 +57,12 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
+
+		<!-- JBIDE-16280 -->
+    <repository>
+      <id>xulrunner-site</id>
+      <url>${xulrunner-site}</url>
+      <layout>p2</layout>
+    </repository>
 	</repositories>
 </project>
