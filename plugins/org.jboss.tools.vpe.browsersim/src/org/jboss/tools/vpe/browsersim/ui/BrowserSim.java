@@ -43,7 +43,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.BrowserSimLogger;
 import org.jboss.tools.vpe.browsersim.BrowserSimRunner;
 import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
+import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
+import org.jboss.tools.vpe.browsersim.js.log.JsLogFunction;
+import org.jboss.tools.vpe.browsersim.js.log.MessageType;
 import org.jboss.tools.vpe.browsersim.model.Device;
 import org.jboss.tools.vpe.browsersim.model.preferences.BrowserSimSpecificPreferencesStorage;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
@@ -119,7 +122,7 @@ public class BrowserSim {
 		initObservers();
 		Device defaultDevice = commonPreferences.getDevices().get(specificPreferences.getSelectedDeviceId()); 
 		if (defaultDevice == null) {
-			BrowserSimLogger.logError("Could not find selected device in devices list", new NullPointerException());
+			BrowserSimLogger.logError("Could not find selected device in devices list", new NullPointerException()); //$NON-NLS-1$
 			String id;
 			try {
 				id = commonPreferences.getDevices().keySet().iterator().next();
@@ -340,8 +343,42 @@ public class BrowserSim {
 				skin.pageTitleChanged(event.title);
 			}
 		});
+		
+		overrideJsConsoleLog(browser); // JBIDE-15932
 	}
 	
+	// JBIDE-15932 need to display console logs especially during startup
+	private void overrideJsConsoleLog(final BrowserSimBrowser browser) {	
+		createLogFunctions(browser);
+		browser.addLocationListener(new LocationAdapter() {  
+			@Override
+			@SuppressWarnings("nls")
+			public void changed(LocationEvent e) {
+				if (PlatformUtil.OS_LINUX.equals(PlatformUtil.getOs())) {
+					createLogFunctions(browser); // TODO need to do this better
+				}
+				browser.execute("(function(){"
+										+ "if (window.console && console.log) {"
+										+	"window.console.log = browserSimConsoleLog;"
+										+	"window.console.info = browserSimConsoleInfo;"
+										+	"window.console.warn = browserSimConsoleWarn;" 
+										+	"window.console.error = browserSimConsoleError;"
+										+	"window.onerror = function(msg, url, lineNumber) {"
+										+		"console.log('ERROR: ' + msg + ' on line ' + lineNumber + ' for ' + url);"
+										+	"}"
+										+ "}"
+								+ "})()");
+			}
+		});
+	}
+
+	private void createLogFunctions(BrowserSimBrowser browser) {
+		new JsLogFunction(browser, "browserSimConsoleLog", null); //$NON-NLS-1$  
+		new JsLogFunction(browser, "browserSimConsoleInfo", MessageType.INFO); //$NON-NLS-1$  
+		new JsLogFunction(browser, "browserSimConsoleWarn", MessageType.WARN); //$NON-NLS-1$  
+		new JsLogFunction(browser, "browserSimConsoleError", MessageType.ERROR); //$NON-NLS-1$  
+	}
+
 	private void initObservers() {
 		commonPreferencesObserver = new Observer() {
 			@Override

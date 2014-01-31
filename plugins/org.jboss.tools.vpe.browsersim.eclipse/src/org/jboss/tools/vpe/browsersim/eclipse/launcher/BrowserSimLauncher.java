@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
+import org.jboss.tools.vpe.browsersim.eclipse.callbacks.JsLogCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.LogCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.OpenFileCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.ViewSourceCallback;
@@ -27,7 +28,8 @@ public class BrowserSimLauncher {
 	public static final List<ExternalProcessCallback> BROWSERSIM_CALLBACKS = Arrays.asList(
 		new ViewSourceCallback(),
 		new OpenFileCallback(),
-		new LogCallback()
+		new LogCallback(),
+		new JsLogCallback()
 	);
 	public static final List<String> BUNDLES = getBundles();
 	public static final List<String> RESOURCES_BUNDLES = Arrays.asList(
