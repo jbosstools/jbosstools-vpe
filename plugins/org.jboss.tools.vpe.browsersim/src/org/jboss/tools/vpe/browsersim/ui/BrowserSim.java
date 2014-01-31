@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.BrowserSimLogger;
 import org.jboss.tools.vpe.browsersim.BrowserSimRunner;
 import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
+import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.jboss.tools.vpe.browsersim.js.log.JsLogFunction;
 import org.jboss.tools.vpe.browsersim.js.log.MessageType;
@@ -348,10 +349,14 @@ public class BrowserSim {
 	
 	// JBIDE-15932 need to display console logs especially during startup
 	private void overrideJsConsoleLog(final BrowserSimBrowser browser) {	
+		createLogFunctions(browser);
 		browser.addLocationListener(new LocationAdapter() {  
 			@Override
 			@SuppressWarnings("nls")
 			public void changed(LocationEvent e) {
+				if (PlatformUtil.OS_LINUX.equals(PlatformUtil.getOs())) {
+					createLogFunctions(browser); // TODO need to do this better
+				}
 				browser.execute("(function(){"
 										+ "if (window.console && console.log) {"
 										+	"window.console.log = browserSimConsoleLog;"
@@ -365,7 +370,9 @@ public class BrowserSim {
 								+ "})()");
 			}
 		});
-		
+	}
+
+	private void createLogFunctions(BrowserSimBrowser browser) {
 		new JsLogFunction(browser, "browserSimConsoleLog", null); //$NON-NLS-1$  
 		new JsLogFunction(browser, "browserSimConsoleInfo", MessageType.INFO); //$NON-NLS-1$  
 		new JsLogFunction(browser, "browserSimConsoleWarn", MessageType.WARN); //$NON-NLS-1$  
