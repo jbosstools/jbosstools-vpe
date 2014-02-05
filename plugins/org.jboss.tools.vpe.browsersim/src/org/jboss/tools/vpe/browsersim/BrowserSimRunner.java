@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.browser.javafx.JavaFXBrowser;
+import org.jboss.tools.vpe.browsersim.devtools.DevToolsDebuggerServer;
 import org.jboss.tools.vpe.browsersim.ui.BrowserSim;
 import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
 import org.jboss.tools.vpe.browsersim.ui.ExceptionNotifier;
@@ -40,7 +41,7 @@ public class BrowserSimRunner {
 	public static final String ABOUT_BLANK = "about:blank"; //"http://www.w3schools.com/js/tryit_view.asp?filename=try_nav_useragent"; //$NON-NLS-1$
 	
 	private static boolean isJavaFxAvailable;
-	static {
+	static { // TODO need to do this better
 		if (PlatformUtil.OS_LINUX.equals(PlatformUtil.getOs())) {
 			isJavaFxAvailable = false; // JavaFx web engine is not supported on Linux
 		} else {
@@ -59,8 +60,6 @@ public class BrowserSimRunner {
 			if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
 				CocoaUIEnhancer.initializeMacOSMenuBar(Messages.BrowserSim_BROWSER_SIM);
 			}
-			
-			
 			
 			BrowserSimArgs browserSimArgs = BrowserSimArgs.parseArgs(args);
 			
@@ -87,6 +86,10 @@ public class BrowserSimRunner {
 
 			BrowserSim browserSim = new BrowserSim(url, parent);
 			browserSim.open(isJavaFxAvailable);
+			
+            if (browserSim.getBrowser() instanceof JavaFXBrowser) {
+                DevToolsDebuggerServer.startDebugServer(((JavaFXBrowser)browserSim.getBrowser()).getDebugger());
+            }
 
 			display = Display.getDefault();
 			while (!display.isDisposed() && BrowserSim.getInstances().size() > 0) {

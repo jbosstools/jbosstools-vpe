@@ -20,6 +20,7 @@ import java.util.Observer;
 
 import javafx.application.Platform;
 
+import org.eclipse.jetty.server.Server;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
@@ -32,6 +33,8 @@ import org.eclipse.swt.browser.TitleEvent;
 import org.eclipse.swt.browser.TitleListener;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Point;
@@ -50,6 +53,7 @@ import org.jboss.tools.vpe.browsersim.browser.IBrowserFunction;
 import org.jboss.tools.vpe.browsersim.browser.IDisposable;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.jboss.tools.vpe.browsersim.browser.javafx.JavaFXBrowser;
+import org.jboss.tools.vpe.browsersim.devtools.DevToolsDebuggerServer;
 import org.jboss.tools.vpe.browsersim.model.Device;
 import org.jboss.tools.vpe.browsersim.model.preferences.BrowserSimSpecificPreferencesStorage;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
@@ -185,6 +189,17 @@ public class BrowserSim {
 					CommonPreferencesStorage.INSTANCE.save(commonPreferences);
 				}
 				commonPreferences.deleteObserver(commonPreferencesObserver);
+			}
+		});
+		
+		shell.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent arg0) {
+				try {
+					DevToolsDebuggerServer.stopDebugServer();
+				} catch (Exception e) {
+					BrowserSimLogger.logError(e.getMessage(), e);
+				}
 			}
 		});
 		
@@ -429,6 +444,14 @@ public class BrowserSim {
 		initSkin(newSkinClass, currentLocation, parentShell);
 		fireSkinChangeEvent();
 		
+		if (skin.getBrowser() instanceof JavaFXBrowser && !Server.STARTED.equals(DevToolsDebuggerServer.getServerState())) {
+            try {
+				DevToolsDebuggerServer.startDebugServer(((JavaFXBrowser)skin.getBrowser()).getDebugger());
+			} catch (Exception e) {
+				BrowserSimLogger.logError(e.getMessage(), e);
+			}
+        }
+		
 		setOrientation(specificPreferences.getOrientationAngle(), device);
 		skin.getBrowser().setUserAgent(device.getUserAgent());
 		
@@ -487,31 +510,27 @@ public class BrowserSim {
 	private void initLiveReloadLocationAdapter() {
 		liveReloadLocationAdapter = new LocationAdapter() {
 			@Override
-			public void changed(LocationEvent event) {
+			public void changed(final LocationEvent event) {
 				if (isLivereloadAvailable()) {
-					IBrowser browser = (IBrowser) event.widget;
-					browser.execute("if (!window.LiveReload) {" + //$NON-NLS-1$
-										"window.addEventListener('load', function(){" + //$NON-NLS-1$
-											"var e = document.createElement('script');" + //$NON-NLS-1$
-											"e.type = 'text/javascript';" + //$NON-NLS-1$
-											"e.async = 'true';" + //$NON-NLS-1$
-											"e.src = 'http://localhost:" + specificPreferences.getLiveReloadPort() + "/livereload.js';" + //$NON-NLS-1$ //$NON-NLS-2$
-											"document.head.appendChild(e);" + //$NON-NLS-1$
-										"});" + //$NON-NLS-1$
-									"}"); //$NON-NLS-1$
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							processLiveReloadEvent(event);
+						}
+					});
 				} else {
 					MessageBox warning = new MessageBox(parentShell, SWT.ICON_WARNING);
 					warning.setText(Messages.WARNING);
 					warning.setMessage(Messages.BrowserSim_LIVERELOAD_WARNING);
 					warning.open();
-					
+
 					skin.getBrowser().removeLocationListener(liveReloadLocationAdapter);
 					specificPreferences.setEnableLiveReload(false);	
 				}
 			}
 		};
 	}
-	
+
 	private boolean isLivereloadAvailable() {
 		try {
 			HttpURLConnection.setFollowRedirects(false);
@@ -523,12 +542,31 @@ public class BrowserSim {
 			return false;
 		}
 	}
+
+	private void processLiveReloadEvent(final LocationEvent event) {
+		IBrowser browser = (IBrowser) event.widget;
+		browser.execute("if (!window.LiveReload) {" + //$NON-NLS-1$
+				"window.addEventListener('load', function(){" + //$NON-NLS-1$
+					"var e = document.createElement('script');" + //$NON-NLS-1$
+					"e.type = 'text/javascript';" + //$NON-NLS-1$
+					"e.async = 'true';" + //$NON-NLS-1$
+					"e.src = 'http://localhost:" + specificPreferences.getLiveReloadPort() + "/livereload.js';" + //$NON-NLS-1$ //$NON-NLS-2$
+					"document.head.appendChild(e);" + //$NON-NLS-1$
+				"});" + //$NON-NLS-1$
+			"}"); //$NON-NLS-1$
+	}
 	
 	private void initTouchEventsLocationAdapter() {
 		touchEventsLocationAdapter = new LocationAdapter() {
 			@Override
-			public void changed(LocationEvent event) {
-				TouchSupportLoader.initTouchEvents((IBrowser) event.widget);
+			public void changed(final LocationEvent event) {
+				Platform.runLater(new Runnable() {
+
+					@Override
+					public void run() {
+						TouchSupportLoader.initTouchEvents((IBrowser) event.widget);						
+					}
+				});
 			}
 		};
 	}

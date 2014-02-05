@@ -34,6 +34,7 @@ import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.jboss.tools.vpe.browsersim.browser.javafx.JavaFXBrowser;
+import org.jboss.tools.vpe.browsersim.devtools.DevToolsDebuggerServer;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
 import org.jboss.tools.vpe.browsersim.ui.ExceptionNotifier;
@@ -62,14 +63,15 @@ public class CordovaSimRunner {
 	
 	private static boolean isJavaFxAvailable;
 
-	static {
+
+	static { // TODO need to do this better
 		if (PlatformUtil.OS_LINUX.equals(PlatformUtil.getOs())) {
 			isJavaFxAvailable = false; // JavaFx web engine is not supported on Linux
 		} else {
 			isJavaFxAvailable = BrowserSimUtil.loadJavaFX();
 		}
 
-		Shell tempShell = new Shell();
+		Shell tempShell = new Shell(); 
 		Browser tempSWTBrowser = new Browser(tempShell, SWT.WEBKIT);
 		JavaFXBrowser tempJavaFXBrowser = new JavaFXBrowser(tempShell);
 		tempSWTBrowser.dispose();
@@ -84,9 +86,7 @@ public class CordovaSimRunner {
 			CocoaUIEnhancer.initializeMacOSMenuBar(Messages.CordovaSim_CORDOVA_SIM);
 		}
 		display = Display.getDefault();
-		
 		CordovaSimArgs.parseArgs(args);
-
 		run();
 	}
 	
@@ -238,6 +238,14 @@ public class CordovaSimRunner {
 					}					
 					event.browser = browserSim.getBrowser();
 					oldBrowser = browserSim.getBrowser();
+					
+					try {
+			            if (browserSim.getBrowser() instanceof JavaFXBrowser  && !Server.STARTED.equals(DevToolsDebuggerServer.getServerState())) {
+			                DevToolsDebuggerServer.startDebugServer(((JavaFXBrowser)browserSim.getBrowser()).getDebugger());
+			            }					
+			        } catch (Exception e) {
+						CordovaSimLogger.logError(e.getMessage(), e);
+					}
 				}
 			}
 		});
