@@ -52,12 +52,6 @@ public class VpeStyleUtil {
 	public static final Pattern CSS_URL_PATTERN = Pattern.compile("(?<=\\burl\\b)(?:[\\p{Space}]*\\()[\\p{Space}]*([^;]*)[\\p{Space}]*(?:\\)[\\p{Space}]*)(?=(?>[^\\)]*;|[^\\)]*))"); //$NON-NLS-1$
 	public static final Pattern CSS_IMPORT_PATTERN = Pattern.compile("@import[\\p{Space}]+(?:\\burl\\b[\\p{Space}]*\\()*[\\p{Space}]*([^;]*)[\\p{Space}]*(?:\\)[\\p{Space}]*(?=(?>[^\\)]*;|[^\\)]*)))*"); //$NON-NLS-1$
 	public static final Pattern CSS_URI_PATTERN = Pattern.compile("(?:\\\"{1}(.*)\\\"{1})|(?:\\'{1}(.*)\\'{1})"); //$NON-NLS-1$
-	/*
-	 * Pattern "|(//.*)" could be added at the end to remove single line comments.
-	 */
-	private static final String CSS_COMMENT_END = "*/"; //$NON-NLS-1$
-	private static final String CSS_COMMENT_START = "/*"; //$NON-NLS-1$
-	
 	public static String ATTR_URL = "url"; //$NON-NLS-1$
 	public static String OPEN_BRACKET = "("; //$NON-NLS-1$
 	public static String CLOSE_BRACKET = ")"; //$NON-NLS-1$

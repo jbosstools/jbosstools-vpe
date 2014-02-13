@@ -23,6 +23,11 @@ import java.util.Map;
 
 import javax.xml.xpath.XPathExpressionException;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IExecutionListener;
+import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,6 +36,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -58,12 +64,10 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
-import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
@@ -82,15 +86,20 @@ import org.w3c.dom.Node;
  * @author Yahor Radtsevich (yradtsevich)
  * @author Ilya Buziuk (ibuziuk)
  */
+
+@SuppressWarnings("restriction")
 public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
-
+	private final static String GROUP_REFRESH = "org.jboss.tools.vpv.refresh"; //$NON-NLS-1$
+	
 	private Browser browser;
 	private IAction refreshAction;
 	private IAction openInDefaultBrowserAction;
-	private IAction disableAutomaticRefreshAction;
-	private boolean disableAutomaticRefresh = false;
+	private IAction enableAutomaticRefreshAction;
+	private IAction enableRefreshOnSaveAction;
+	private boolean enableAutomaticRefresh = false;
+	private IExecutionListener saveListener;
 	
 	private Job currentJob;
 	
@@ -103,10 +112,34 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private IEditorPart currentEditor;
 
 	private IDocumentListener documentListener;
-	
+
+	private Command saveCommand;
 	
 	public VpvView() {
 		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
+		
+		ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
+		saveCommand = commandService.getCommand("org.eclipse.ui.file.save");
+		saveListener = new IExecutionListener() {
+
+			@Override
+			public void postExecuteSuccess(String arg0, Object arg1) {
+				updatePreview();
+			}
+
+			@Override
+			public void notHandled(String arg0, NotHandledException arg1) {
+			}
+
+			@Override
+			public void postExecuteFailure(String arg0, ExecutionException arg1) {
+			}
+
+			@Override
+			public void preExecute(String arg0, ExecutionEvent arg1) {
+			}
+
+		};
 	}
 	
 	@Override
@@ -195,7 +228,9 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(refreshAction);
 		manager.add(openInDefaultBrowserAction);
-		manager.add(disableAutomaticRefreshAction);
+		manager.add(new Separator(GROUP_REFRESH));
+		manager.appendToGroup(GROUP_REFRESH, enableAutomaticRefreshAction);
+		manager.appendToGroup(GROUP_REFRESH, enableRefreshOnSaveAction);
 	}
 
 	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
@@ -221,7 +256,6 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	public void setModelHolderId(int modelHolderId) {
 		this.modelHolderId = modelHolderId;
 	}
-	
 	
 	public IEditorPart getCurrentEditor() {
 		return currentEditor;
@@ -278,65 +312,10 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 				@Override
 				public void documentChanged(DocumentEvent event) {
-					if (!disableAutomaticRefresh) { 
-						if (currentJob == null || currentJob.getState() != Job.WAITING) {
-							if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
-								currentJob.cancel();
-							}
-							currentJob = createPreviewUpdateJob();
-						}
-
-						currentJob.schedule(500);
-					
-//					IDocument document = event.getDocument();
-//					if (document != null) 	{
-//						int startSelectionPosition = event.getOffset();
-//						int endSelectionPosition = startSelectionPosition + event.getText().length();
-//
-//						Node firstSelectedNode = getNodeBySourcePosition(document, startSelectionPosition);
-//						Node lastSelectedNode = getNodeBySourcePosition(document, endSelectionPosition);
-//
-//						processNodes(firstSelectedNode, lastSelectedNode);
-//					}
+					if (enableAutomaticRefresh) { 
+						updatePreview();
 					}
 				}
-				
-
-				
-//				private void processNodes(Node firstSelectedNode, Node lastSelectedNode) {
-//					if ((firstSelectedNode == null) || (lastSelectedNode == null)) {;
-//						sourceDomChanged(getRootNode(firstSelectedNode)); // rebuild the whole document
-//					} else {
-//						Node commonNode = getCommonNode(firstSelectedNode, lastSelectedNode);
-//						if (commonNode != null){
-//							sourceDomChanged(commonNode);
-//						}
-//					}
-//				}
-
-//				private Node getCommonNode(Node firstNode, Node secondNode) {
-//					if (firstNode == secondNode) {
-//						return firstNode;
-//					} else {
-//						Set<Node> firstNodeParents = getParentNodes(firstNode);	
-//						firstNodeParents.add(firstNode); // firstSelectedNode could be parent node for lastSelectedNode
-//						
-//						Node commonNode = null;
-//						Node secondNodeParent = secondNode;
-//						while (secondNodeParent != null && commonNode == null) {
-//							if (firstNodeParents.contains(secondNodeParent)) {
-//								commonNode = secondNodeParent;
-//							}
-//							secondNodeParent = getParentNode(secondNodeParent);
-//						}
-//	
-//						if (commonNode == null) {
-//							commonNode = getRootNode(firstNode);
-//						}
-//						
-//						return commonNode;
-//					}
-//				}
 
 			};
 		}
@@ -347,27 +326,48 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private void makeActions() {
 		makeRefreshAction();
 		makeOpenInDefaultBrowserAction();
-		makeDisableAutomaticRefreshAction();
-
+		makeEnableAutomaticRefreshAction();
+		makeEnableRefreshOnSaveAction();
 	}
 
-	private void makeDisableAutomaticRefreshAction() {
-		disableAutomaticRefreshAction = new Action(Messages.VpvView_DISABLE_AUTOMATIC_REFRESH, IAction.AS_CHECK_BOX) {
+	private void makeEnableAutomaticRefreshAction() {
+		enableAutomaticRefreshAction = new Action(Messages.VpvView_ENABLE_AUTOMATIC_REFRESH, IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				if (disableAutomaticRefreshAction.isChecked()) {
-					disableAutomaticRefresh = true;
+				if (enableAutomaticRefreshAction.isChecked()) {
+					enableAutomaticRefresh = true;
+
+					enableRefreshOnSaveAction.setChecked(false);
+					saveCommand.removeExecutionListener(saveListener);
 				} else {
-					disableAutomaticRefresh = false;
-					refresh(browser);
+					enableAutomaticRefresh = false;
 				}
 			}
 		};
 
-		disableAutomaticRefreshAction.setChecked(false);
-		disableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/automatic_refresh.gif")); //$NON-NLS-1$
+		enableAutomaticRefreshAction.setChecked(true);
+		enableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/automatic_refresh.png"));
 	}
+	
+	private void makeEnableRefreshOnSaveAction() {
+		enableRefreshOnSaveAction = new Action(Messages.VpvView_ENABLE_REFRESH_ON_SAVE, IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if (enableRefreshOnSaveAction.isChecked()) {
+					saveCommand.addExecutionListener(saveListener);
 
+					enableAutomaticRefreshAction.setChecked(false);
+					enableAutomaticRefresh = false;
+				} else {
+					saveCommand.removeExecutionListener(saveListener);
+				}
+			}
+		};
+
+		enableRefreshOnSaveAction.setChecked(false);
+		enableRefreshOnSaveAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh_on_save.png"));
+	}
+	
 	private void makeOpenInDefaultBrowserAction() {
 		openInDefaultBrowserAction = new Action() {
 			public void run(){
@@ -395,9 +395,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		refreshAction.setText(Messages.VpvView_REFRESH);
 		refreshAction.setToolTipText(Messages.VpvView_REFRESH);
 		refreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh.gif")); //$NON-NLS-1$
-
 	}
-	   	
+
 	private Job createPreviewUpdateJob() {
 		Job job = new UIJob("Preview Update") { //$NON-NLS-1$
 			@Override
@@ -411,6 +410,17 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		return job;
 	}
 	
+	private void updatePreview() {
+		if (currentJob == null || currentJob.getState() != Job.WAITING) {
+			if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
+				currentJob.cancel();
+			}
+			currentJob = createPreviewUpdateJob();
+		}
+
+		currentJob.schedule(500);
+	}
+		
 	private void refresh(Browser browser){
 		browser.setUrl(browser.getUrl());
 	}
@@ -563,27 +573,6 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 			editorDocument = editorDocumentElement.getOwnerDocument();
 		}
 		return editorDocument;
-	}
-	
-	@SuppressWarnings("restriction")
-	private Node getNodeBySourcePosition(IDocument document, int position) {
-		IStructuredModel model = null;
-		Node node = null;
-		try {
-			model = StructuredModelManager.getModelManager().getExistingModelForRead(document);
-			if (model != null) {
-				IndexedRegion indexedRegion = model.getIndexedRegion(position);
-				if (indexedRegion instanceof Node) {
-					node  = (Node) indexedRegion;
-				}
-			}
-		} finally {
-			if (model != null) {
-				model.releaseFromRead();
-			}
-		}
-		
-		return node;
 	}
 	
 	private Node getNodeFromSelection(IStructuredSelection selection) {

@@ -25,7 +25,6 @@ import org.jboss.tools.vpe.vpv.template.VpeCreationData;
 import org.jboss.tools.vpe.vpv.template.VpeTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -55,83 +54,6 @@ public class VpvDomBuilder {
 
 		VpvVisualModel visualModel = new VpvVisualModel(visualDocument, sourceVisualMapping);
 		return visualModel;
-	}
-	
-	public VisualMutation rebuildSubtree(VpvVisualModel visualModel, Document sourceDocument, Node sourceParent) {
-		/*  mappedParent = sourceParent;
-		 * 	if mappedParent not contained in sourceVisualMap {
-		 * 		mappedParent = find an ascendant which is contained
-		 * 	}
-		 * 
-		 * 10. remove mappedParent and its descendants from the sourceVisualMapping
-		 * 20. remove mappedVisualParent and its descendants from the visualDocument
-		 * 30. add newVisualNode to the place of mappedVisualParent
-		 */
-		Map<Node, Node> sourceVisualMapping = visualModel.getSourceVisualMapping();
-		
-		Node mappedSourceParent = sourceParent;
-		Node oldMappedVisualParent = null;
-		while (true) {
-			if (mappedSourceParent != null) { 
-				oldMappedVisualParent = sourceVisualMapping.get(mappedSourceParent);
-				if (oldMappedVisualParent instanceof Element 
-						&& ((Element) oldMappedVisualParent).hasAttribute(ATTR_VPV_ID)) {
-					break;
-				}
-			} else {
-				break;
-			}
-				
-			mappedSourceParent = DomUtil.getParentNode(mappedSourceParent);
-		}		
-		
-		removeSubtreeFromMapping(mappedSourceParent, sourceVisualMapping);
-		
-		Node newMappedVisualParent = convertNode(sourceDocument, mappedSourceParent, 
-				visualModel.getVisualDocument(), sourceVisualMapping);
-		
-		long oldParentId = getNodeMarkerId(oldMappedVisualParent);
-		long newParentId = -1; 
-		if (newMappedVisualParent != null) {
-			DomUtil.getParentNode(oldMappedVisualParent).replaceChild(newMappedVisualParent, oldMappedVisualParent);
-			newParentId = markSubtree(newMappedVisualParent);
-		} else {
-			DomUtil.getParentNode(oldMappedVisualParent).removeChild(oldMappedVisualParent);
-		}
-
-		return new VisualMutation(oldParentId, newMappedVisualParent);
-	}
-	
-	private long getNodeMarkerId(Node oldMappedVisualParent) {
-		if (oldMappedVisualParent instanceof Element) {
-			String stringMarkerId = ((Element) oldMappedVisualParent).getAttribute(ATTR_VPV_ID);
-			if (stringMarkerId != null) {
-				try {
-					return Long.parseLong(stringMarkerId);
-				} catch (NumberFormatException e) { // do not throw exception if cannot parse
-				}
-			}
-		}
-		return -1;
-	}
-
-	private void removeSubtreeFromMapping(Node sourceParent,
-			Map<Node, Node> sourceVisualMapping) {
-		sourceVisualMapping.remove(sourceParent);
-		
-		if (sourceParent.getNodeType() == Node.ELEMENT_NODE) {
-			NamedNodeMap attributes = sourceParent.getAttributes();
-			for (int i = 0; i < attributes.getLength(); i++) {
-				Node attribute = attributes.item(i);
-				sourceVisualMapping.remove(attribute);
-			}
-		}
-		
-		NodeList children = sourceParent.getChildNodes();
-		for (int i = 0; i < children.getLength(); i++) {
-			Node child = children.item(i);
-			removeSubtreeFromMapping(child, sourceVisualMapping);
-		}
 	}
 	
 	private long markSubtree(Node visualParent) {
