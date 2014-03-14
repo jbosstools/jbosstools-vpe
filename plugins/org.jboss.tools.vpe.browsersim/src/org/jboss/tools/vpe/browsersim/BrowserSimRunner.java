@@ -44,16 +44,13 @@ public class BrowserSimRunner {
 		}
 	}
 	
-	static { // TODO need to do this better
-		if (PlatformUtil.OS_LINUX.equals(PlatformUtil.getOs())) {
-			isJavaFxAvailable = false; // JavaFx web engine is not supported on Linux
-		} else {
+	static { 
+		isJavaFxAvailable = false;
+		boolean isLinux = PlatformUtil.OS_LINUX.equals(PlatformUtil.getOs());
+		
+		// Trying to load javaFx libs except Linux GTK3 case
+		if (!(isLinux && !BrowserSimUtil.isRunningAgainstGTK2())) {
 			isJavaFxAvailable = BrowserSimUtil.loadJavaFX();
-			//no need to load both engines because engines switches after complete restart.
-			//@see JBIDE-16493
-//			if (isJavaFxAvailable) {
-//				BrowserSimUtil.loadWebkitLibraries();
-//			}
 		}
 	}
 	

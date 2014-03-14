@@ -21,11 +21,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.cordavasim.eclipse.callbacks.CordovaSimRestartCallback;
-import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
+import org.jboss.tools.vpe.browsersim.eclipse.Activator;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.JsLogCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.LogCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.OpenFileCallback;
@@ -33,6 +34,7 @@ import org.jboss.tools.vpe.browsersim.eclipse.callbacks.ViewSourceCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.BrowserSimLauncher;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.ExternalProcessCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.ExternalProcessLauncher;
+import org.jboss.tools.vpe.browsersim.eclipse.preferences.BrowserSimPreferencesPage;
 import org.jboss.tools.vpe.browsersim.util.BrowserSimUtil;
 
 /**
@@ -48,27 +50,7 @@ public class CordovaSimLauncher {
 			new JsLogCallback(),
 			new CordovaSimRestartCallback()
 		);
-	private static final List<String> BUNDLES = new ArrayList<String>(); 
-	static {
-		BUNDLES.addAll(BrowserSimLauncher.BUNDLES);
-		BUNDLES.addAll(Arrays.asList(
-			"org.jboss.tools.vpe.cordovasim", //$NON-NLS-1$
-			"org.jboss.tools.vpe.cordovasim.ripple", //$NON-NLS-1$
-			"org.jboss.tools.vpe.browsersim.debugger", //$NON-NLS-1$
-			"org.eclipse.jetty.continuation", //$NON-NLS-1$
-			"org.eclipse.jetty.continuation", //$NON-NLS-1$
-			"org.eclipse.jetty.http", //$NON-NLS-1$
-			"org.eclipse.jetty.io", //$NON-NLS-1$
-		    "org.eclipse.jetty.security", //$NON-NLS-1$
-			"org.eclipse.jetty.server", //$NON-NLS-1$
-			"org.eclipse.jetty.servlet", //$NON-NLS-1$
-			"org.eclipse.jetty.util", //$NON-NLS-1$
-		    "org.eclipse.jetty.client", //$NON-NLS-1$
-		    "org.eclipse.jetty.servlets", //$NON-NLS-1$
-		    "org.eclipse.jetty.rewrite", //$NON-NLS-1$
-			"javax.servlet" //$NON-NLS-1$
-		));
-	}
+
 
 	private static final List<String> RESOURCES_BUNDLES = BrowserSimLauncher.RESOURCES_BUNDLES;
 	
@@ -146,18 +128,45 @@ public class CordovaSimLauncher {
 		}
 	}
 	
+	public static List<String> getBundles() {
+		List<String> bundles = BrowserSimLauncher.getBundles();
+		bundles.addAll(Arrays.asList(
+				"org.jboss.tools.vpe.cordovasim", //$NON-NLS-1$
+				"org.jboss.tools.vpe.cordovasim.ripple", //$NON-NLS-1$
+				"org.jboss.tools.vpe.browsersim.debugger", //$NON-NLS-1$
+				"org.eclipse.jetty.continuation", //$NON-NLS-1$
+				"org.eclipse.jetty.continuation", //$NON-NLS-1$
+				"org.eclipse.jetty.http", //$NON-NLS-1$
+				"org.eclipse.jetty.io", //$NON-NLS-1$
+				"org.eclipse.jetty.security", //$NON-NLS-1$
+				"org.eclipse.jetty.server", //$NON-NLS-1$
+				"org.eclipse.jetty.servlet", //$NON-NLS-1$
+				"org.eclipse.jetty.util", //$NON-NLS-1$
+				"org.eclipse.jetty.client", //$NON-NLS-1$
+				"org.eclipse.jetty.servlets", //$NON-NLS-1$
+				"org.eclipse.jetty.rewrite", //$NON-NLS-1$
+				"javax.servlet" //$NON-NLS-1$
+		));
+
+		return bundles;
+	}
+	
 	public static void launchCordovaSim(List<String> parameters) {
 		IVMInstall jvm = BrowserSimLauncher.getSelectedVM();
 		
 		String jvmPath = jvm.getInstallLocation().getAbsolutePath();
 		String jrePath = jvm.getInstallLocation().getAbsolutePath() + File.separator + "jre"; //$NON-NLS-1$
-
-		if (PlatformUtil.OS_LINUX.equals(PlatformUtil.getOs()) 
-				|| (!BrowserSimUtil.isJavaFxAvailable(jvmPath) && !BrowserSimUtil.isJavaFxAvailable(jrePath))) {
-			BUNDLES.add("org.jboss.tools.vpe.browsersim.javafx.mock"); //$NON-NLS-1$
+		
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		
+		List<String> bundles = getBundles();
+		
+		if ((IPreferenceStore.FALSE.equals(store.getString(BrowserSimPreferencesPage.BROWSERSIM_GTK_2))
+				|| (!BrowserSimUtil.isJavaFxAvailable(jvmPath) && !BrowserSimUtil.isJavaFxAvailable(jrePath)))) {
+			bundles.add("org.jboss.tools.vpe.browsersim.javafx.mock"); //$NON-NLS-1$
 		}
 		
-		ExternalProcessLauncher.launchAsExternalProcess(BUNDLES, RESOURCES_BUNDLES,
+		ExternalProcessLauncher.launchAsExternalProcess(bundles, RESOURCES_BUNDLES,
 				CORDOVASIM_CALLBACKS, CORDOVASIM_CLASS_NAME, parameters, Messages.CordovaSimLauncher_CORDOVASIM, jvm);
 	}
 }
