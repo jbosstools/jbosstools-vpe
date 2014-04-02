@@ -1,5 +1,7 @@
 package org.eclipse.swt.browser;
 
+import java.lang.reflect.Field;
+
 import org.eclipse.core.runtime.Platform;
 
 public class BrowserInitializer {
@@ -9,15 +11,34 @@ public class BrowserInitializer {
 
 	public static boolean isGTK3() {
 		if (Platform.WS_GTK.equals(Platform.getWS())) {
-			String gtk3 = System.getProperty(SWT_GTK3);
-			if (gtk3 == null) {
-				gtk3 = System.getenv(SWT_GTK3);
+			try {
+				Class<?> clazz = Class.forName("org.eclipse.swt.internal.gtk.OS"); //$NON-NLS-1$
+				Field field = clazz.getDeclaredField("GTK3"); //$NON-NLS-1$
+				boolean gtk3 = field.getBoolean(field);
+				return gtk3;
+			} catch (ClassNotFoundException e) {
+				return isGTK3Env();
+			} catch (NoSuchFieldException e) {
+				return false;
+			} catch (SecurityException e) {
+				return isGTK3Env();
+			} catch (IllegalArgumentException e) {
+				return isGTK3Env();
+			} catch (IllegalAccessException e) {
+				return isGTK3Env();
 			}
-			return !"0".equals(gtk3); //$NON-NLS-1$
 		}
 		return false;
 	}
 
+	private static boolean isGTK3Env() {
+		String gtk3 = System.getProperty(SWT_GTK3);
+		if (gtk3 == null) {
+			gtk3 = System.getenv(SWT_GTK3);
+		}
+		return !"0".equals(gtk3); //$NON-NLS-1$
+	}
+	
 	static {
 		/* Under Linux instantiation of WebKit should be avoided,
 		 * because WebKit and XULRunner running simultaneously
@@ -27,7 +48,7 @@ public class BrowserInitializer {
 		if (Platform.OS_LINUX.equals(Platform.getOS())) {
 			String defaultType = System.getProperty(PROPERTY_DEFAULTTYPE);
 			if (defaultType == null) {
-				defaultType = isGTK3() ? "webkit" : "mozila"; //$NON-NLS-1$ //$NON-NLS-2$
+				defaultType = isGTK3() ? "webkit" : "mozilla"; //$NON-NLS-1$ //$NON-NLS-2$
 				System.setProperty(PROPERTY_DEFAULTTYPE, defaultType);
 			}
 		}
