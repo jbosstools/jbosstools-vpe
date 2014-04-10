@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributor:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.vpe.vpv.server;
 
 import java.io.BufferedReader;
@@ -18,12 +28,16 @@ import org.jboss.tools.vpe.vpv.Activator;
 import org.jboss.tools.vpe.vpv.transform.ResourceAcceptor;
 import org.jboss.tools.vpe.vpv.transform.VpvController;
 
+/**
+ * @author Yahor Radtsevich (yradtsevich)
+ * @author Ilya Buziuk (ibuziuk)
+ */
 public class VpvSocketProcessor implements Runnable {
 
-    public static final String INITIAL_REQUEST_LINE = "Initial request line";
-    public static final String REFERER = "Referer";
-    public static final String IF_NONE_MATCH = "If-None-Match";
-    public static final String HOST = "Host";
+    public static final String INITIAL_REQUEST_LINE = "Initial request line"; //$NON-NLS-1$
+    public static final String REFERER = "Referer"; //$NON-NLS-1$
+    public static final String IF_NONE_MATCH = "If-None-Match"; //$NON-NLS-1$
+    public static final String HOST = "Host"; //$NON-NLS-1$
 
 	private Socket clientSocket;
 	private VpvController vpvController;
@@ -155,7 +169,7 @@ public class VpvSocketProcessor implements Runnable {
     }
 	
 	private String getIfNoneMatchValue(Map<String, String> headers) {
-		String ifNoneMatchValue = "";
+		String ifNoneMatchValue = ""; //$NON-NLS-1$
 		if (headers != null && headers.containsKey(IF_NONE_MATCH)) {
 			ifNoneMatchValue = headers.get(IF_NONE_MATCH);
 		}
@@ -245,11 +259,11 @@ public class VpvSocketProcessor implements Runnable {
 
 		String parameterString = urlString.substring(delimiterPosition + 1, urlString.length());
 
-		String[] parameterArray = parameterString.split("&");
+		String[] parameterArray = parameterString.split("&"); //$NON-NLS-1$
 		Map<String, String> parameterMap = new HashMap<String, String>();
 		for (String param : parameterArray) {
 			if (param.length() > 0) {
-				String[] nameValue = param.split("=");
+				String[] nameValue = param.split("="); //$NON-NLS-1$
 				String name = nameValue[0];
 				String value = nameValue.length > 1 ? nameValue[1] : null;
 				parameterMap.put(name, value);
@@ -263,7 +277,7 @@ public class VpvSocketProcessor implements Runnable {
 	}
 
 	private String getHttpRequestString(String initialRequestLine) {
-		String[] data = initialRequestLine.split(" ");
+		String[] data = initialRequestLine.split(" "); //$NON-NLS-1$
 		return data[1];
 	}
 
@@ -363,29 +377,29 @@ public class VpvSocketProcessor implements Runnable {
     	
 
 	private String getOkResponceHeader(String mimeType, String eTag) {
-		String responceHeader = "HTTP/1.1 200 OK\r\n" +
-				"Server: VPV server" +"\r\n"+
-				"Content-Type: " + mimeType + "\r\n" +
-				"Cache-Control: max-age=0\r\n" + 
-				"Etag: " + eTag + "\r\n" +
-				"Connection: close\r\n\r\n";
+		String responceHeader = "HTTP/1.1 200 OK\r\n" + //$NON-NLS-1$
+				"Server: VPV server" +"\r\n"+ //$NON-NLS-1$ //$NON-NLS-2$
+				"Content-Type: " + mimeType + "\r\n" + //$NON-NLS-1$ //$NON-NLS-2$
+				"Cache-Control: max-age=0\r\n" +  //$NON-NLS-1$
+				"Etag: " + eTag + "\r\n" +  //$NON-NLS-1$//$NON-NLS-2$
+				"Connection: close\r\n\r\n"; //$NON-NLS-1$
 		return responceHeader;
 	}
 	
 	private String getNotFoundHeader() {
-        String responceHeader = "HTTP/1.1 404 Not Found\r\n" +
-                "Content-Type: text/html; charset=UTF-8\r\n" +
-                "Connection: close\r\n\r\n" +
-                "<!DOCTYPE HTML>" +
-                "<h1>404 Not Found<//h1>";
+        String responceHeader = "HTTP/1.1 404 Not Found\r\n" + //$NON-NLS-1$
+                "Content-Type: text/html; charset=UTF-8\r\n" + //$NON-NLS-1$
+                "Connection: close\r\n\r\n" + //$NON-NLS-1$
+                "<!DOCTYPE HTML>" + //$NON-NLS-1$
+                "<h1>404 Not Found<//h1>"; //$NON-NLS-1$
         return responceHeader;
 	} 
 	
 	private String getNotModifiedHeader(String eTag) {
-		String responceHeader = "HTTP/1.1 304 Not Modified\r\n" +
-				"Server: VPV server\r\n"+
-				"Etag: " + eTag + "\r\n" +
-				"Connection: close\r\n\r\n";
+		String responceHeader = "HTTP/1.1 304 Not Modified\r\n" + //$NON-NLS-1$
+				"Server: VPV server\r\n"+ //$NON-NLS-1$
+				"Etag: " + eTag + "\r\n" + //$NON-NLS-1$ //$NON-NLS-2$
+				"Connection: close\r\n\r\n"; //$NON-NLS-1$
 		return responceHeader;
 	}
 	

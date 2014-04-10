@@ -14,6 +14,9 @@ import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
 
+/**
+ * @author Yahor Radtsevich (yradtsevich)
+ */
 public class VpeStyleUtil {
 
 	public static final String UNRESOLVED_IMAGE_PATH = "unresolved_image.gif"; //$NON-NLS-1$

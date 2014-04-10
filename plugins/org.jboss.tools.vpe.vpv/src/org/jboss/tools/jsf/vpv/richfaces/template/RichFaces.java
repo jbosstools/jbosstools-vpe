@@ -8,7 +8,6 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-
 package org.jboss.tools.jsf.vpv.richfaces.template;
 
 import java.util.ArrayList;
@@ -109,7 +108,7 @@ public class RichFaces {
 	public static final String VALUE_BOTTOM = "bottom"; //$NON-NLS-1$
 	public static final String VALUE_CENTER = "center"; //$NON-NLS-1$
 	
-	public static final String COLLAPSED_STATE = "collapsedState";
+	public static final String COLLAPSED_STATE = "collapsedState"; //$NON-NLS-1$
 	
 	
 	public static List<Element> findElementsById(Element root, String id, String tagName) {

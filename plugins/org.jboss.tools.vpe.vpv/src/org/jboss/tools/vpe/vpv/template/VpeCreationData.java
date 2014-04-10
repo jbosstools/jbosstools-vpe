@@ -16,6 +16,9 @@ import java.util.List;
 import org.jboss.tools.vpe.vpv.mapping.VpeElementData;
 import org.w3c.dom.Node;
 
+/**
+ * @author Yahor Radtsevich (yradtsevich)
+ */
 public class VpeCreationData {
 	private Node visualNode;
 	private List<VpeChildrenInfo> childrenInfoList;

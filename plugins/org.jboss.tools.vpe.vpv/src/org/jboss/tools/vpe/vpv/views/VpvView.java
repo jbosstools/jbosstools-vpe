@@ -1,8 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributor:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.vpe.vpv.views;
 
-/**
- * @author Yahor Radtsevich (yradtsevich)
- */
 
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.ABOUT_BLANK;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.HTTP;
@@ -13,6 +20,8 @@ import static org.jboss.tools.vpe.vpv.server.HttpConstants.VIEW_ID;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+
+import javax.xml.xpath.XPathExpressionException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,8 +38,12 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.ProgressAdapter;
 import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
@@ -49,16 +62,15 @@ import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.INodeAdapter;
-import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.jboss.tools.vpe.vpv.Activator;
 import org.jboss.tools.vpe.vpv.transform.DomUtil;
-import org.jboss.tools.vpe.vpv.transform.VisualMutation;
+import org.jboss.tools.vpe.vpv.transform.TransformUtil;
 import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModel;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
@@ -66,6 +78,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+/**
+ * @author Yahor Radtsevich (yradtsevich)
+ * @author Ilya Buziuk (ibuziuk)
+ */
 public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
@@ -105,6 +121,20 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		parent.setLayout(new FillLayout());	
 		browser = new Browser(parent, SWT.NONE);
 		browser.setUrl(ABOUT_BLANK);
+		
+		// Disabling all links 
+		browser.addLocationListener(new LocationAdapter() {
+			@Override
+			public void changed(LocationEvent event) {
+				browser.execute("(function() { " //$NON-NLS-1$
+							  + 	"var anchors = document.getElementsByTagName('a');"   //$NON-NLS-1$
+							  + 	"for (var i = 0; i < anchors.length; i++) {"  //$NON-NLS-1$
+							  + 		"anchors[i].onclick = function() {return(false);};" //$NON-NLS-1$
+							  + 	"};" //$NON-NLS-1$
+							  +	"})();"); //$NON-NLS-1$
+			}
+		});
+		
 		browser.addProgressListener(new ProgressAdapter() {
 			@Override
 			public void completed(ProgressEvent event) {
@@ -112,6 +142,44 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 				updateSelectionAndScrollToIt(currentSelection);
 			}
 		});
+		
+		browser.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseUp(MouseEvent event) {
+				
+			}
+			
+			@Override
+			public void mouseDown(MouseEvent event) {
+				String stringToEvaluate = "return document.elementFromPoint(" + event.x + ", " + event.y + ").outerHTML;"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String result = (String) browser.evaluate(stringToEvaluate);
+				
+				String selectedElementId = TransformUtil.getSelectedElementId(result, "(?<=data-vpvid=\").*?(?=\")"); //$NON-NLS-1$
+				
+				try {
+					Node visualNode = TransformUtil.getVisualNodeByVpvId(visualModel, selectedElementId);
+					Node sourseNode = TransformUtil.getSourseNodeByVisualNode(visualModel, visualNode);
+										
+					if (sourseNode != null && sourseNode instanceof IDOMNode) {
+						int startOffset = ((IDOMNode) sourseNode).getStartOffset();
+						int endOffset = ((IDOMNode) sourseNode).getEndOffset();
+						
+						StructuredTextEditor editor = (StructuredTextEditor) currentEditor.getAdapter(StructuredTextEditor.class);	
+						editor.selectAndReveal(startOffset, endOffset - startOffset);
+					}
+				
+				} catch (XPathExpressionException e) {
+					Activator.logError(e);
+				}
+			}
+			
+			@Override
+			public void mouseDoubleClick(MouseEvent event) {
+				
+			}
+		});
+		
 		inizializeSelectionListener();	
 		inizializeEditorListener(browser, modelHolderId);
 		
@@ -297,7 +365,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		};
 
 		disableAutomaticRefreshAction.setChecked(false);
-		disableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/automatic_refresh.gif"));
+		disableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/automatic_refresh.gif")); //$NON-NLS-1$
 	}
 
 	private void makeOpenInDefaultBrowserAction() {
@@ -315,7 +383,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		
 		openInDefaultBrowserAction.setText(Messages.VpvView_OPEN_IN_DEFAULT_BROWSER);
 		openInDefaultBrowserAction.setToolTipText(Messages.VpvView_OPEN_IN_DEFAULT_BROWSER);
-		openInDefaultBrowserAction.setImageDescriptor(Activator.getImageDescriptor("icons/open_in_default_browser.gif"));
+		openInDefaultBrowserAction.setImageDescriptor(Activator.getImageDescriptor("icons/open_in_default_browser.gif")); //$NON-NLS-1$
 	}
 
 	private void makeRefreshAction() {
@@ -560,12 +628,14 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		return id;
 	}
 	
+
+	
 	private void updateBrowserSelection(Long currentSelectionId) {
 		String selectionStyle;
 		if (currentSelectionId == null) {
-			selectionStyle = "";
+			selectionStyle = ""; //$NON-NLS-1$
 		} else {
-			selectionStyle = "'[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"] {outline: 2px solid blue;}'";
+			selectionStyle = "'[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"] {outline: 2px solid blue;}'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		
 		browser.execute(
@@ -586,17 +656,17 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 				"document.body.appendChild(style);" + //$NON-NLS-1$
 //			"}" +
 			"style.id = 'VPV-STYLESHEET';" +  //$NON-NLS-1$
-			"})(" + selectionStyle + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"})(" + selectionStyle + ")"); //$NON-NLS-1$ //$NON-NLS-2$ 
 	}
 	
 	private void scrollToId(Long currentSelectionId) {
 		if (currentSelectionId != null) {
-			browser.execute(
+			System.out.println(browser.execute(
 					"(function(){" + //$NON-NLS-1$
 							"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							"selectedElement.scrollIntoView(true);" + //$NON-NLS-1$
 					"})()"   //$NON-NLS-1$
-			);
+			));
 		}
 	}
 

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributor:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.vpe.vpv.transform;
 
 import java.io.File;
@@ -16,6 +26,10 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.jboss.tools.vpe.vpv.Activator;
 import org.w3c.dom.Document;
 
+/**
+ * @author Yahor Radtsevich (yradtsevich)
+ * @author Ilya Buziuk (ibuziuk)
+ */
 @SuppressWarnings("restriction")
 public class VpvController {
 	private VpvDomBuilder domBuilder;	
@@ -68,7 +82,7 @@ public class VpvController {
 		}
 		
 		if (htmlText != null) {
-			resourceAcceptor.acceptText("<!DOCTYPE html>\n" + htmlText, "text/html"); // XXX: remove doctype when selection will work in old IE
+			resourceAcceptor.acceptText("<!DOCTYPE html>\n" + htmlText, "text/html"); // XXX: remove doctype when selection will work in old IE  //$NON-NLS-1$//$NON-NLS-2$
 		} else if (requestedFile.getLocation() != null 
 				&& requestedFile.getLocation().toFile() != null
 				&& requestedFile.getLocation().toFile().exists()) {
@@ -83,11 +97,11 @@ public class VpvController {
 	private static String getMimeType(File file) {
 		MimetypesFileTypeMap mimeTypes;
 		try {
-			mimeTypes = new MimetypesFileTypeMap(Activator.getFileUrl("lib/mime.types").openStream());
+			mimeTypes = new MimetypesFileTypeMap(Activator.getFileUrl("lib/mime.types").openStream()); //$NON-NLS-1$
 			return mimeTypes.getContentType(file);
 		} catch (IOException e) {
 			Activator.logError(e);
-			return "application/octet-stream";
+			return "application/octet-stream"; //$NON-NLS-1$
 		}
 	}
 }

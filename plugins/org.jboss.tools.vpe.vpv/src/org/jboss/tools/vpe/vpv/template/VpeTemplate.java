@@ -13,7 +13,9 @@ package org.jboss.tools.vpe.vpv.template;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-
+/**
+ * @author Yahor Radtsevich (yradtsevich)
+ */
 public interface VpeTemplate {
 	/**
 	 * Creates a node of the visual tree on the node of the source tree. This

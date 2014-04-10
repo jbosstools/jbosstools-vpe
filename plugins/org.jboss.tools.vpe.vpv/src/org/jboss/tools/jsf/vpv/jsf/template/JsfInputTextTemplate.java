@@ -8,7 +8,6 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-
 package org.jboss.tools.jsf.vpv.jsf.template;
 
 import org.jboss.tools.vpe.vpv.mapping.AttributeData;

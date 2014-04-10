@@ -8,7 +8,6 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-
 package org.jboss.tools.jsf.vpv.ajax4jsf.template;
 
 import org.jboss.tools.jsf.vpv.richfaces.template.RichFaces;

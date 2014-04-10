@@ -10,6 +10,9 @@
  ******************************************************************************/ 
 package org.jboss.tools.vpe.vpv.template;
 
+/**
+ * @author Yahor Radtsevich (yradtsevich)
+ */
 import java.util.ArrayList;
 import java.util.List;
 

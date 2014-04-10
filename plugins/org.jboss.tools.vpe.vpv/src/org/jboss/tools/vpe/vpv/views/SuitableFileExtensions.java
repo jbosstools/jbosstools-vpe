@@ -1,10 +1,23 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributor:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.vpe.vpv.views;
 
+/**
+ * @author Ilya Buziuk (ibuziuk)
+ */
 public enum SuitableFileExtensions {
-	HTML("html"), 
-	HTM("htm"), 
-	XHTML("xhtml"), 
-	JSP("jsp");
+	HTML("html"), //$NON-NLS-1$
+	HTM("htm"), //$NON-NLS-1$
+	XHTML("xhtml"), //$NON-NLS-1$
+	JSP("jsp"); //$NON-NLS-1$
 
 	private final String value;
 
@@ -17,13 +30,12 @@ public enum SuitableFileExtensions {
 	}
 
 	public static boolean contains(String fileExtension) {
-
 		for (SuitableFileExtensions extension : SuitableFileExtensions.values()) {
 			if (extension.value.equals(fileExtension)) {
 				return true;
 			}
 		}
-
 		return false;
 	}
+
 }

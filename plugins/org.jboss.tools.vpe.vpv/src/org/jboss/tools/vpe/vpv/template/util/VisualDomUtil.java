@@ -25,7 +25,10 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-
+/**
+ * @author Yahor Radtsevich (yradtsevich)
+ * @author Ilya Buziuk (ibuziuk)
+ */
 public class VisualDomUtil {
 	
 	public static String JSF_CORE_URI = "http://java.sun.com/jsf/core"; //$NON-NLS-1$

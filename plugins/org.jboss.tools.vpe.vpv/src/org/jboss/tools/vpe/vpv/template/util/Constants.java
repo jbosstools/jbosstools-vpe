@@ -8,10 +8,15 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-
 package org.jboss.tools.vpe.vpv.template.util;
 
-public class Constants {
+/**
+ * @author Yahor Radtsevich (yradtsevich)
+ */
+public final class Constants {
+
+	private Constants() {
+	}
 
 	public static final String TRUE = "true"; //$NON-NLS-1$
 	public static final String FALSE = "false"; //$NON-NLS-1$
