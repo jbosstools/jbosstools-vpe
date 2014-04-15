@@ -98,7 +98,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private IAction openInDefaultBrowserAction;
 	private IAction enableAutomaticRefreshAction;
 	private IAction enableRefreshOnSaveAction;
-	private boolean enableAutomaticRefresh = false;
+	private boolean enableAutomaticRefresh = true;//available by default
 	private IExecutionListener saveListener;
 	
 	private Job currentJob;
@@ -346,7 +346,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		};
 
 		enableAutomaticRefreshAction.setChecked(true);
-		enableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/automatic_refresh.png"));
+		enableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh_on_change.png"));
 	}
 	
 	private void makeEnableRefreshOnSaveAction() {
