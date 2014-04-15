@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.jboss.tools.vpe.vpv; singleton:=true
 Bundle-Version: 3.5.100.qualifier
 Bundle-Activator: org.jboss.tools.vpe.vpv.Activator
 Bundle-Vendor: JBoss by Red Hat
+Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
