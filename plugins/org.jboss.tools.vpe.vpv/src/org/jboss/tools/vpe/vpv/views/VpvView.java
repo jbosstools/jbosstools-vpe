@@ -45,10 +45,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
-import org.eclipse.swt.browser.ProgressAdapter;
-import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
@@ -72,6 +70,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.jboss.tools.vpe.vpv.Activator;
+import org.jboss.tools.vpe.vpv.navigation.JsNavigationUtil;
 import org.jboss.tools.vpe.vpv.transform.DomUtil;
 import org.jboss.tools.vpe.vpv.transform.TransformUtil;
 import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
@@ -85,33 +84,25 @@ import org.w3c.dom.Node;
  * @author Yahor Radtsevich (yradtsevich)
  * @author Ilya Buziuk (ibuziuk)
  */
-
 @SuppressWarnings("restriction")
 public class VpvView extends ViewPart implements VpvVisualModelHolder {
-
 	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
-	private final static String GROUP_REFRESH = "org.jboss.tools.vpv.refresh"; //$NON-NLS-1$
+	private static final String GROUP_REFRESH = "org.jboss.tools.vpv.refresh"; //$NON-NLS-1$
 	
 	private Browser browser;
 	private IAction refreshAction;
 	private IAction openInDefaultBrowserAction;
 	private IAction enableAutomaticRefreshAction;
 	private IAction enableRefreshOnSaveAction;
-	private boolean enableAutomaticRefresh = true; //available by default
+	private boolean enableAutomaticRefresh = true; // available by default
 	private IExecutionListener saveListener;
-	
 	private Job currentJob;
-	
 	private VpvVisualModel visualModel;
 	private int modelHolderId;
-
 	private EditorListener editorListener;
 	private SelectionListener selectionListener;
-	
 	private IEditorPart currentEditor;
-
 	private IDocumentListener documentListener;
-
 	private Command saveCommand;
 	
 	public VpvView() {
@@ -123,7 +114,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 			@Override
 			public void postExecuteSuccess(String arg0, Object arg1) {
-				updatePreview();
+				refresh(browser);
 			}
 
 			@Override
@@ -154,39 +145,21 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		browser = new Browser(parent, SWT.NONE);
 		browser.setUrl(ABOUT_BLANK);
 		
-		// Disabling all links 
 		browser.addLocationListener(new LocationAdapter() {
 			@Override
 			public void changed(LocationEvent event) {
-				browser.execute("(function() { " //$NON-NLS-1$
-							  + 	"var anchors = document.getElementsByTagName('a');"   //$NON-NLS-1$
-							  + 	"for (var i = 0; i < anchors.length; i++) {"  //$NON-NLS-1$
-							  + 		"anchors[i].onclick = function() {return(false);};" //$NON-NLS-1$
-							  + 	"};" //$NON-NLS-1$
-							  +	"})();"); //$NON-NLS-1$
-			}
-		});
-		
-		browser.addProgressListener(new ProgressAdapter() {
-			@Override
-			public void completed(ProgressEvent event) {
+				JsNavigationUtil.disableLinks(browser);
+				
 				ISelection currentSelection = getCurrentSelection();
 				updateSelectionAndScrollToIt(currentSelection);
-			}
+			}			
 		});
-		
-		browser.addMouseListener(new MouseListener() {
-			
+				
+		browser.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent event) {
-				
-			}
-			
-			@Override
-			public void mouseDown(MouseEvent event) {
 				String stringToEvaluate = "return document.elementFromPoint(" + event.x + ", " + event.y + ").outerHTML;"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				String result = (String) browser.evaluate(stringToEvaluate);
-				
 				String selectedElementId = TransformUtil.getSelectedElementId(result, "(?<=data-vpvid=\").*?(?=\")"); //$NON-NLS-1$
 				
 				try {
@@ -199,16 +172,13 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 						
 						StructuredTextEditor editor = (StructuredTextEditor) currentEditor.getAdapter(StructuredTextEditor.class);	
 						editor.selectAndReveal(startOffset, endOffset - startOffset);
+						
+						JsNavigationUtil.outlineSelectedElement(browser, Long.parseLong(selectedElementId));
 					}
-				
+					
 				} catch (XPathExpressionException e) {
 					Activator.logError(e);
 				}
-			}
-			
-			@Override
-			public void mouseDoubleClick(MouseEvent event) {
-				
 			}
 		});
 		
@@ -423,6 +393,15 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private void refresh(Browser browser){
 		browser.setUrl(browser.getUrl());
 	}
+	
+	private ISelection getCurrentSelection() {
+		Activator activator = Activator.getDefault();
+		IWorkbench workbench = activator.getWorkbench();
+		IWorkbenchWindow workbenchWindow = workbench.getActiveWorkbenchWindow();
+		ISelectionService selectionService = workbenchWindow.getSelectionService();
+		ISelection selection = selectionService.getSelection();
+		return selection;
+	}
 
 	private boolean isCurrentEditor(IEditorPart editorPart) {
 		if (currentEditor == editorPart) {
@@ -526,15 +505,6 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		}
 	}
 	
-	private ISelection getCurrentSelection() {
-		Activator activator = Activator.getDefault();
-		IWorkbench workbench = activator.getWorkbench();
-		IWorkbenchWindow workbenchWindow = workbench.getActiveWorkbenchWindow();
-		ISelectionService selectionService = workbenchWindow.getSelectionService();
-		ISelection selection = selectionService.getSelection();
-		return selection;
-	}
-
 	private boolean isInCurrentEditor(IStructuredSelection selection) {
 		Node selectedNode = getNodeFromSelection(selection);
 		Document selectionDocument = null;
@@ -616,46 +586,13 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		return id;
 	}
 	
-
-	
-	private void updateBrowserSelection(Long currentSelectionId) {
-		String styleAttributeSelector;
-		if (currentSelectionId == null) {
-			styleAttributeSelector = ""; //$NON-NLS-1$
-		} else {
-			styleAttributeSelector = "'[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"] {outline: 2px solid blue; border: 2px solid blue;  z-index: 1000;}'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-		
-		browser.execute(
-		"(function(css) {" + //$NON-NLS-1$
-			"var style=document.getElementById('VPV-STYLESHEET');" + //$NON-NLS-1$
-				"if (style == null) {" + //$NON-NLS-1$
-					"style = document.createElement('STYLE');" + //$NON-NLS-1$
-					"style.type = 'text/css';" + //$NON-NLS-1$
-				"}" + //$NON-NLS-1$
-				"style.innerHTML = css;" + //$NON-NLS-1$
-				"document.body.appendChild(style);" + //$NON-NLS-1$
-			"style.id = 'VPV-STYLESHEET';" +  //$NON-NLS-1$
-			"})(" + styleAttributeSelector + ")"); //$NON-NLS-1$ //$NON-NLS-2$ 
-	}
-	
-	private void scrollToId(Long currentSelectionId) {
-		if (currentSelectionId != null) {
-			browser.execute(
-					"(function(){" + //$NON-NLS-1$
-							"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							"selectedElement.scrollIntoView(true);" + //$NON-NLS-1$
-					"})()"   //$NON-NLS-1$
-			);
-		}
-	}
-
 	private void updateSelectionAndScrollToIt(ISelection currentSelection) {
 		if (currentSelection instanceof IStructuredSelection) {
 			Node sourceNode = getNodeFromSelection((IStructuredSelection) currentSelection);
 			Long currentSelectionId = getIdForSelection(sourceNode, visualModel);
-			updateBrowserSelection(currentSelectionId);
-			scrollToId(currentSelectionId);
+			JsNavigationUtil.scrollToId(browser, currentSelectionId);
+			JsNavigationUtil.outlineSelectedElement(browser, currentSelectionId);
 		}
 	}
+	
 }
