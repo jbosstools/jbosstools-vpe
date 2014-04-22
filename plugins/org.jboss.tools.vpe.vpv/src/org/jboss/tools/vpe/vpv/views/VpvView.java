@@ -70,12 +70,12 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.jboss.tools.vpe.vpv.Activator;
-import org.jboss.tools.vpe.vpv.navigation.JsNavigationUtil;
 import org.jboss.tools.vpe.vpv.transform.DomUtil;
 import org.jboss.tools.vpe.vpv.transform.TransformUtil;
 import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModel;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
+import org.jboss.tools.vpe.vpv.util.JsNavigationUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -148,6 +148,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		browser.addLocationListener(new LocationAdapter() {
 			@Override
 			public void changed(LocationEvent event) {
+				JsNavigationUtil.disableAlert(browser);
 				JsNavigationUtil.disableLinks(browser);
 				
 				ISelection currentSelection = getCurrentSelection();
