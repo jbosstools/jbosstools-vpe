@@ -10,8 +10,8 @@
             name="%ViewName"
             icon="icons/view.png"
             category="web.views.category.id"
-            class="org.jboss.tools.vpe.vpv.views.VpvView"
-            id="org.jboss.tools.vpe.vpv.views.VpvView">
+            class="org.jboss.tools.vpe.vpv.view.VpvView"
+            id="org.jboss.tools.vpe.vpv.view.VpvView">
       </view>
    </extension>
    <extension

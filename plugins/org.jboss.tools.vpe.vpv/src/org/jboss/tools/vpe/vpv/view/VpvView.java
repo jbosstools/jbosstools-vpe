@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Red Hat, Inc.
+ * Copyright (c) 2013-2014 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,7 +8,7 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.vpv.views;
+package org.jboss.tools.vpe.vpv.view;
 
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.ABOUT_BLANK;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.HTTP;
@@ -18,7 +18,6 @@ import static org.jboss.tools.vpe.vpv.server.HttpConstants.VIEW_ID;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -52,11 +51,11 @@ import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -65,19 +64,16 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.jboss.tools.vpe.vpv.Activator;
-import org.jboss.tools.vpe.vpv.transform.DomUtil;
 import org.jboss.tools.vpe.vpv.transform.TransformUtil;
-import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModel;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
-import org.jboss.tools.vpe.vpv.util.JsNavigationUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jboss.tools.vpe.vpv.util.EditorUtil;
+import org.jboss.tools.vpe.vpv.util.NavigationUtil;
+import org.jboss.tools.vpe.vpv.util.SuitableFileExtensions;
 import org.w3c.dom.Node;
 
 /**
@@ -86,9 +82,9 @@ import org.w3c.dom.Node;
  */
 @SuppressWarnings("restriction")
 public class VpvView extends ViewPart implements VpvVisualModelHolder {
-	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
+	public static final String ID = "org.jboss.tools.vpe.vpv.view.VpvView"; //$NON-NLS-1$
 	private static final String GROUP_REFRESH = "org.jboss.tools.vpv.refresh"; //$NON-NLS-1$
-	
+
 	private Browser browser;
 	private IAction refreshAction;
 	private IAction openInDefaultBrowserAction;
@@ -104,12 +100,14 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private IEditorPart currentEditor;
 	private IDocumentListener documentListener;
 	private Command saveCommand;
-	
+	private Command saveAllCommand;
+
 	public VpvView() {
 		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
-		
+
 		ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
 		saveCommand = commandService.getCommand("org.eclipse.ui.file.save"); //$NON-NLS-1$
+		saveAllCommand = commandService.getCommand("org.eclipse.ui.file.saveAll"); //$NON-NLS-1$
 		saveListener = new IExecutionListener() {
 
 			@Override
@@ -131,7 +129,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 		};
 	}
-	
+
 	@Override
 	public void dispose() {
 		getSite().getPage().removePartListener(editorListener);
@@ -139,57 +137,63 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		Activator.getDefault().getVisualModelHolderRegistry().unregisterHolder(this);
 		super.dispose();
 	}
-	
+
 	public void createPartControl(Composite parent) {
-		parent.setLayout(new FillLayout());	
+		parent.setLayout(new FillLayout());
 		browser = new Browser(parent, SWT.NONE);
 		browser.setUrl(ABOUT_BLANK);
-		
+
 		browser.addLocationListener(new LocationAdapter() {
 			@Override
 			public void changed(LocationEvent event) {
-				JsNavigationUtil.disableAlert(browser);
-				JsNavigationUtil.disableLinks(browser);
-				
+				NavigationUtil.disableAlert(browser);
+				NavigationUtil.disableLinks(browser);
+
 				ISelection currentSelection = getCurrentSelection();
-				updateSelectionAndScrollToIt(currentSelection);
-			}			
+				NavigationUtil.updateSelectionAndScrollToIt(currentSelection, browser, visualModel);
+			}
 		});
-				
+
 		browser.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent event) {
 				String stringToEvaluate = "return document.elementFromPoint(" + event.x + ", " + event.y + ").outerHTML;"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				String result = (String) browser.evaluate(stringToEvaluate);
 				String selectedElementId = TransformUtil.getSelectedElementId(result, "(?<=data-vpvid=\").*?(?=\")"); //$NON-NLS-1$
-				
-				try {
-					Node visualNode = TransformUtil.getVisualNodeByVpvId(visualModel, selectedElementId);
-					Node sourseNode = TransformUtil.getSourseNodeByVisualNode(visualModel, visualNode);
-										
-					if (sourseNode != null && sourseNode instanceof IDOMNode) {
-						int startOffset = ((IDOMNode) sourseNode).getStartOffset();
-						int endOffset = ((IDOMNode) sourseNode).getEndOffset();
-						
-						StructuredTextEditor editor = (StructuredTextEditor) currentEditor.getAdapter(StructuredTextEditor.class);	
-						editor.selectAndReveal(startOffset, endOffset - startOffset);
-						
-						JsNavigationUtil.outlineSelectedElement(browser, Long.parseLong(selectedElementId));
+
+				NavigationUtil.outlineSelectedElement(browser, Long.parseLong(selectedElementId));
+
+				String fileExtension = EditorUtil.getFileExtensionFromEditor(currentEditor);
+
+				if (SuitableFileExtensions.isHTML(fileExtension)) {
+					try {
+						Node visualNode = TransformUtil.getVisualNodeByVpvId(visualModel, selectedElementId);
+						Node sourseNode = TransformUtil.getSourseNodeByVisualNode(visualModel, visualNode);
+
+						if (sourseNode != null && sourseNode instanceof IDOMNode) {
+							int startOffset = ((IDOMNode) sourseNode).getStartOffset();
+							int endOffset = ((IDOMNode) sourseNode).getEndOffset();
+
+							StructuredTextEditor editor = (StructuredTextEditor) currentEditor.getAdapter(StructuredTextEditor.class);
+							editor.selectAndReveal(startOffset, endOffset - startOffset);
+
+						}
+
+					} catch (XPathExpressionException e) {
+						Activator.logError(e);
 					}
-					
-				} catch (XPathExpressionException e) {
-					Activator.logError(e);
 				}
 			}
+
 		});
-		
-		inizializeSelectionListener();	
+
+		inizializeSelectionListener();
 		inizializeEditorListener(browser, modelHolderId);
-		
+
 		makeActions();
 		contributeToActionBars();
 	}
-	
+
 	private void contributeToActionBars() {
 		IActionBars bars = getViewSite().getActionBars();
 		fillLocalToolBar(bars.getToolBarManager());
@@ -203,7 +207,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		manager.appendToGroup(GROUP_REFRESH, enableRefreshOnSaveAction);
 	}
 
-	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
+	private void inizializeEditorListener(Browser browser, int modelHolderId) {
 		editorListener = new EditorListener();
 		getSite().getPage().addPartListener(editorListener);
 		editorListener.showBootstrapPart();
@@ -211,7 +215,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 	private void inizializeSelectionListener() {
 		selectionListener = new SelectionListener();
-		getSite().getPage().addPostSelectionListener(selectionListener);	
+		getSite().getPage().addPostSelectionListener(selectionListener);
 	}
 
 	public void setFocus() {
@@ -226,31 +230,24 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	public void setModelHolderId(int modelHolderId) {
 		this.modelHolderId = modelHolderId;
 	}
-	
+
 	public IEditorPart getCurrentEditor() {
 		return currentEditor;
 	}
-	
+
 	public void editorChanged(IEditorPart editor) {
 		if (currentEditor == editor) {
 			// do nothing
 		} else if (editor == null) {
 			browser.setUrl(ABOUT_BLANK);
 			setCurrentEditor(null);
-		} else if (isImportant(editor)) {
+		} else if (EditorUtil.isImportant(editor)) {
 			formRequestToServer(editor);
 			setCurrentEditor(editor);
 		} else {
 			browser.setUrl(ABOUT_BLANK);
 			setCurrentEditor(null);
 		}
-	}
-	
-	private boolean isImportant(IEditorPart editor) {
-		if (editor.getAdapter(StructuredTextEditor.class) != null){
-			return true; // TODO check DOM model support
-		}
-		return false;
 	}
 
 	private void setCurrentEditor(IEditorPart currentEditor) {
@@ -260,29 +257,39 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 				document.removeDocumentListener(getDocumentListener());
 			}
 		}
-		
+
 		this.currentEditor = currentEditor;
-		
+
 		if (this.currentEditor != null) {
 			IDocument document = (IDocument) this.currentEditor.getAdapter(IDocument.class);
+			String fileExtension = EditorUtil.getFileExtensionFromEditor(this.currentEditor);
+			
+			// Trying to extract document for js and css files
+			if (document == null && SuitableFileExtensions.isCssOrJs(fileExtension)) {
+				document = ((AbstractDecoratedTextEditor) this.currentEditor).getDocumentProvider().getDocument(currentEditor.getEditorInput());
+			}
+
 			if (document != null) {
 				document.addDocumentListener(getDocumentListener());
 			}
 		}
 	}
-	
+
 	private IDocumentListener getDocumentListener() {
 		if (documentListener == null) {
 			documentListener = new IDocumentListener() {
 
 				@Override
 				public void documentAboutToBeChanged(DocumentEvent event) {
-					// Don't handle this event
 				}
 
 				@Override
 				public void documentChanged(DocumentEvent event) {
-					if (enableAutomaticRefresh) { 
+					if (enableAutomaticRefresh) {
+						String fileExtension = EditorUtil.getFileExtensionFromEditor(currentEditor);
+						if (SuitableFileExtensions.isCssOrJs(fileExtension)) {
+							getActivePage().saveEditor(currentEditor, false); // saving all js and css stuff							
+						}
 						updatePreview();
 					}
 				}
@@ -292,7 +299,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 		return documentListener;
 	}
-	
+
 	private void makeActions() {
 		makeRefreshAction();
 		makeOpenInDefaultBrowserAction();
@@ -309,6 +316,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 					enableRefreshOnSaveAction.setChecked(false);
 					saveCommand.removeExecutionListener(saveListener);
+					saveAllCommand.removeExecutionListener(saveListener);
 				} else {
 					enableAutomaticRefresh = false;
 				}
@@ -318,18 +326,20 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		enableAutomaticRefreshAction.setChecked(true);
 		enableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh_on_change.png")); //$NON-NLS-1$
 	}
-	
+
 	private void makeEnableRefreshOnSaveAction() {
 		enableRefreshOnSaveAction = new Action(Messages.VpvView_ENABLE_REFRESH_ON_SAVE, IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				if (enableRefreshOnSaveAction.isChecked()) {
 					saveCommand.addExecutionListener(saveListener);
-
+					saveAllCommand.addExecutionListener(saveListener);
+					
 					enableAutomaticRefreshAction.setChecked(false);
 					enableAutomaticRefresh = false;
 				} else {
 					saveCommand.removeExecutionListener(saveListener);
+					saveAllCommand.removeExecutionListener(saveListener);
 				}
 			}
 		};
@@ -337,10 +347,10 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		enableRefreshOnSaveAction.setChecked(false);
 		enableRefreshOnSaveAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh_on_save.png")); //$NON-NLS-1$
 	}
-	
+
 	private void makeOpenInDefaultBrowserAction() {
 		openInDefaultBrowserAction = new Action() {
-			public void run(){
+			public void run() {
 				URL url;
 				try {
 					url = new URL(browser.getUrl()); // validate URL (to do not open 'about:blank' and similar)
@@ -349,8 +359,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 					Activator.logError(e);
 				}
 			}
-		}; 
-		
+		};
+
 		openInDefaultBrowserAction.setText(Messages.VpvView_OPEN_IN_DEFAULT_BROWSER);
 		openInDefaultBrowserAction.setToolTipText(Messages.VpvView_OPEN_IN_DEFAULT_BROWSER);
 		openInDefaultBrowserAction.setImageDescriptor(Activator.getImageDescriptor("icons/open_in_default_browser.gif")); //$NON-NLS-1$
@@ -379,7 +389,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		};
 		return job;
 	}
-	
+
 	private void updatePreview() {
 		if (currentJob == null || currentJob.getState() != Job.WAITING) {
 			if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
@@ -390,11 +400,11 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 		currentJob.schedule(500);
 	}
-		
-	private void refresh(Browser browser){
+
+	private void refresh(Browser browser) {
 		browser.setUrl(browser.getUrl());
 	}
-	
+
 	private ISelection getCurrentSelection() {
 		Activator activator = Activator.getDefault();
 		IWorkbench workbench = activator.getWorkbench();
@@ -410,7 +420,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		}
 		return false;
 	}
-	
+
 	private String formUrl(IFile ifile) {
 		String projectName = ifile.getProject().getName();
 		String projectRelativePath = ifile.getProjectRelativePath().toString();
@@ -421,20 +431,18 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		return url;
 	}
 
-	private IFile getFileOpenedInEditor(IEditorPart editorPart) {
-		IFile file = null;
-		if (editorPart != null && editorPart.getEditorInput() instanceof IFileEditorInput) {
-			IFileEditorInput fileEditorInput = (IFileEditorInput) editorPart.getEditorInput();
-			file = fileEditorInput.getFile();
-		}
-		return file;
-	}
-	
 	private void formRequestToServer(IEditorPart editor) {
-		IFile ifile = getFileOpenedInEditor(editor);
-		if (ifile != null && SuitableFileExtensions.contains(ifile.getFileExtension().toString())) {
-			String url = formUrl(ifile);
-			browser.setUrl(url); 
+		IFile file = EditorUtil.getFileOpenedInEditor(editor);
+		String fileExtension = null;
+		if (file != null && file.exists()) {
+			fileExtension = file.getFileExtension();
+		}
+
+		if (SuitableFileExtensions.contains(fileExtension)) {
+			if (SuitableFileExtensions.isHTML(fileExtension)) {
+				String url = formUrl(file);
+				browser.setUrl(url);
+			}
 		} else {
 			browser.setUrl(ABOUT_BLANK);
 		}
@@ -489,111 +497,24 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		}
 
 		public void showBootstrapPart() {
-			IEditorPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-					.getActiveEditor();
+			IEditorPart activeEditor = getActivePage().getActiveEditor();
 			formRequestToServer(activeEditor);
 		}
 
 	}
-	
+
 	private class SelectionListener implements ISelectionListener {
 
 		@Override
 		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-			if (selection instanceof IStructuredSelection && isInCurrentEditor((IStructuredSelection) selection)) {
-				updateSelectionAndScrollToIt(selection);
+			if (selection instanceof IStructuredSelection && EditorUtil.isInCurrentEditor((IStructuredSelection) selection, currentEditor)) {
+				NavigationUtil.updateSelectionAndScrollToIt(selection, browser, visualModel);
 			}
 		}
 	}
 	
-	private boolean isInCurrentEditor(IStructuredSelection selection) {
-		Node selectedNode = getNodeFromSelection(selection);
-		Document selectionDocument = null;
-		if (selectedNode != null) {
-			selectionDocument = selectedNode.getOwnerDocument();
-		}
+	private IWorkbenchPage getActivePage() {
+		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+	}
 		
-		Document editorDocument = getEditorDomDocument();
-		
-		if (selectionDocument != null && selectionDocument == editorDocument) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private Document getEditorDomDocument() {
-		IDOMModel editorModel = null;
-		if (currentEditor != null) {
-			editorModel = (IDOMModel) currentEditor.getAdapter(IDOMModel.class);
-		}
-
-		IDOMDocument editorIdomDocument = null;
-		if (editorModel != null) {
-			editorIdomDocument = editorModel.getDocument();
-		}
-		
-		Element editorDocumentElement = null;
-		if (editorIdomDocument != null) {
-			editorDocumentElement = editorIdomDocument.getDocumentElement();
-		}
-		
-		Document editorDocument = null;
-		if (editorDocumentElement != null) {
-			editorDocument = editorDocumentElement.getOwnerDocument();
-		}
-		return editorDocument;
-	}
-	
-	private Node getNodeFromSelection(IStructuredSelection selection) {
-		Object firstElement = selection.getFirstElement();
-		if (firstElement instanceof Node) {
-			return (Node) firstElement;
-		} else {
-			return null;
-		}
-	}
-	
-	public Long getIdForSelection(Node selectedSourceNode, VpvVisualModel visualModel) {
-		Long id = null;
-		if (selectedSourceNode != null && visualModel != null) {
-			Map<Node, Node> sourceVisuaMapping = visualModel.getSourceVisualMapping();
-			
-			Node visualNode = null;
-			Node sourceNode = selectedSourceNode;
-			do {
-				visualNode = sourceVisuaMapping.get(sourceNode);
-				sourceNode = DomUtil.getParentNode(sourceNode);
-			} while (visualNode == null && sourceNode != null);
-			
-			if (!(visualNode instanceof Element)) { // text node, comment, etc
-				visualNode = DomUtil.getParentNode(visualNode); // should be element now or null
-			}
-			
-			String idString = null;
-			if (visualNode instanceof Element) {
-				Element elementNode = (Element) visualNode;
-				idString = elementNode.getAttribute(VpvDomBuilder.ATTR_VPV_ID);
-			}
-			
-			if (idString != null && !idString.isEmpty()) {
-				try {
-					id = Long.parseLong(idString);
-				} catch (NumberFormatException e) {
-					Activator.logError(e);
-				}
-			}
-		}
-		return id;
-	}
-	
-	private void updateSelectionAndScrollToIt(ISelection currentSelection) {
-		if (currentSelection instanceof IStructuredSelection) {
-			Node sourceNode = getNodeFromSelection((IStructuredSelection) currentSelection);
-			Long currentSelectionId = getIdForSelection(sourceNode, visualModel);
-			JsNavigationUtil.scrollToId(browser, currentSelectionId);
-			JsNavigationUtil.outlineSelectedElement(browser, currentSelectionId);
-		}
-	}
-	
 }

@@ -8,7 +8,7 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.vpv.views;
+package org.jboss.tools.vpe.vpv.view;
 
 import org.eclipse.osgi.util.NLS;
 

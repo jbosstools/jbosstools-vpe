@@ -10,29 +10,27 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.vpv.util;
 
+import java.util.Map;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.browser.Browser;
+import org.jboss.tools.vpe.vpv.Activator;
+import org.jboss.tools.vpe.vpv.transform.DomUtil;
 import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
+import org.jboss.tools.vpe.vpv.transform.VpvVisualModel;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * @author Ilya Buziuk (ibuziuk)
  */
-public final class JsNavigationUtil {
+public final class NavigationUtil {
 	private static final String VPV_SELECTION_STYLE_ID = "VPV_STYLESHEET_ID";  //$NON-NLS-1$
 	
-	private JsNavigationUtil() {
+	private NavigationUtil() {
 	}
-	
-	public static void scrollToId(Browser browser, Long currentSelectionId) {
-		if (browser != null && !browser.isDisposed()) {
-			if (currentSelectionId != null) {
-				browser.execute("(setTimeout(function() {" + //$NON-NLS-1$								
-									"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-									"selectedElement.scrollIntoView(true);" + //$NON-NLS-1$
-								"}, 300))();");   //$NON-NLS-1$;
-			}
-		}
-	}
-	
+		
 	public static void disableLinks(Browser browser) {
 		if (browser != null && !browser.isDisposed()) {
 			browser.execute("(setTimeout(function() { " +  //$NON-NLS-1$
@@ -76,6 +74,59 @@ public final class JsNavigationUtil {
 
 	public static void disableAlert(Browser browser) {
 		browser.execute("window.alert = function() {};"); //$NON-NLS-1$
+	}
+	
+	public static void updateSelectionAndScrollToIt(ISelection currentSelection, Browser browser, VpvVisualModel visualModel) {
+		if (currentSelection instanceof IStructuredSelection) {
+			Node sourceNode = EditorUtil.getNodeFromSelection((IStructuredSelection) currentSelection);
+			Long currentSelectionId = getIdForSelection(sourceNode, visualModel);
+			NavigationUtil.scrollToId(browser, currentSelectionId);
+			NavigationUtil.outlineSelectedElement(browser, currentSelectionId);
+		}
+	}
+	
+	private static void scrollToId(Browser browser, Long currentSelectionId) {
+		if (browser != null && !browser.isDisposed()) {
+			if (currentSelectionId != null) {
+				browser.execute("(setTimeout(function() {" + //$NON-NLS-1$								
+									"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+									"selectedElement.scrollIntoView(true);" + //$NON-NLS-1$
+								"}, 300))();");   //$NON-NLS-1$;
+			}
+		}
+	}
+	
+	private static Long getIdForSelection(Node selectedSourceNode, VpvVisualModel visualModel) {
+		Long id = null;
+		if (selectedSourceNode != null && visualModel != null) {
+			Map<Node, Node> sourceVisuaMapping = visualModel.getSourceVisualMapping();
+
+			Node visualNode = null;
+			Node sourceNode = selectedSourceNode;
+			do {
+				visualNode = sourceVisuaMapping.get(sourceNode);
+				sourceNode = DomUtil.getParentNode(sourceNode);
+			} while (visualNode == null && sourceNode != null);
+
+			if (!(visualNode instanceof Element)) { // text node, comment, etc
+				visualNode = DomUtil.getParentNode(visualNode); // should be element now or null
+			}
+
+			String idString = null;
+			if (visualNode instanceof Element) {
+				Element elementNode = (Element) visualNode;
+				idString = elementNode.getAttribute(VpvDomBuilder.ATTR_VPV_ID);
+			}
+
+			if (idString != null && !idString.isEmpty()) {
+				try {
+					id = Long.parseLong(idString);
+				} catch (NumberFormatException e) {
+					Activator.logError(e);
+				}
+			}
+		}
+		return id;
 	}
 
 }
