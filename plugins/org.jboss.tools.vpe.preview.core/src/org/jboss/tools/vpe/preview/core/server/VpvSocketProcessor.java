@@ -86,7 +86,7 @@ public class VpvSocketProcessor implements Runnable {
             public void acceptText(String text, String mimeType) {
             	String etag = formEtagForText();
                 String responceHeader = getOkResponceHeader(mimeType,  etag);
-                sendOkResponce(responceHeader, outputToClient, text);
+                sendOkResponse(responceHeader, outputToClient, text);
             }
 
 			@Override
@@ -122,12 +122,12 @@ public class VpvSocketProcessor implements Runnable {
 				}
 			}
 			
-			private void sendOkResponce(String header, DataOutputStream outputToclient, String text) {
+			private void sendOkResponse(String header, DataOutputStream outputToclient, String text) {
 				try {
 					outputToClient.writeBytes(header);
 					outputToClient.writeBytes(text);
 				} catch (IOException e) {
-					Activator.logError(e);
+					//Activator.logError(e);
 				} finally {
 					try {
 						outputToClient.close();

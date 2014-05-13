@@ -6,7 +6,7 @@
 		<artifactId>plugins</artifactId>
 		<version>3.5.100-SNAPSHOT</version>
 	</parent>
-	<groupId>org.jboss.tools.vpe.preview</groupId>
+	<groupId>org.jboss.tools.vpe.plugins</groupId>
 	<artifactId>org.jboss.tools.vpe.preview</artifactId> 
 	
 	<packaging>eclipse-plugin</packaging>

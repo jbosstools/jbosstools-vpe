@@ -18,37 +18,38 @@ import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.ui.ISources;
 import org.eclipse.ui.commands.IElementUpdater;
 import org.eclipse.ui.menus.UIElement;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
-import org.jboss.tools.vpe.editor.VpeController;
 
 /**
- * Handler which disable icons when vpe part not visible
+ * Handler which disables buttons when VPE part not visible
  * 
  * @author mareshkau
  * 
  */
 public abstract class VisualPartAbstractHandler extends AbstractHandler
 		implements IElementUpdater {
+
 	public static final String VPE_CATEGORY_ID = "org.jboss.tools.vpe.category"; //$NON-NLS-1$
+
 	@Override
-	public void setEnabled(Object evaluationContext) {
+	public void setEnabled(Object evalCtx) {
 		boolean enabled = false;
-		
-		if (evaluationContext instanceof IEvaluationContext) {
-			IEvaluationContext context = (IEvaluationContext) evaluationContext;
-			Object activeEditor = context.getVariable(ISources.ACTIVE_EDITOR_NAME);
-			if(activeEditor instanceof JSPMultiPageEditor){
-				JSPMultiPageEditor jspEditor = (JSPMultiPageEditor) activeEditor;
-				if(jspEditor.getVisualEditor().getController()!=null)
-				enabled=((VpeController)(jspEditor.getVisualEditor().getController())).isVisualEditorVisible();
+		if (evalCtx instanceof IEvaluationContext) {
+			IEvaluationContext context = (IEvaluationContext) evalCtx;
+			Object activeEditor = context
+					.getVariable(ISources.ACTIVE_EDITOR_NAME);
+			if (activeEditor instanceof JSPMultiPageEditor) {
+				IVisualEditor ve = ((JSPMultiPageEditor) activeEditor)
+						.getVisualEditor();
+				if (ve != null && ve.getController() != null) {
+					enabled = ve.getController().isVisualEditorVisible();
+				}
 			}
 		}
-		
-		if (enabled != isEnabled()) {
-			setBaseEnabled(enabled);
-		}
+		setBaseEnabled(enabled);
 	}
-	
+
 	public void updateElement(UIElement element, Map parameters) {
 		fireHandlerChanged(new HandlerEvent(this, true, false));
 	}

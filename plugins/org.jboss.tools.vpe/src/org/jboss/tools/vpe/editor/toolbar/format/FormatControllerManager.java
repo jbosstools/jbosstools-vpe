@@ -14,23 +14,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.core.internal.document.TextImpl;
 import org.w3c.dom.Node;
-
-import org.jboss.tools.common.reporting.ProblemReportingHelper;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.SourceSelectionBuilder;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.SourceSelection;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.SelectedNodeInfo;
 import org.jboss.tools.vpe.VpePlugin;
-import org.jboss.tools.vpe.editor.VpeController;
-import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
-import org.jboss.tools.vpe.editor.mapping.VpeElementMapping;
-import org.jboss.tools.vpe.editor.mapping.VpeNodeMapping;
-import org.jboss.tools.vpe.editor.template.VpeTemplate;
+import org.jboss.tools.vpe.editor.VisualController;
 import org.jboss.tools.vpe.editor.template.textformating.FormatData;
 import org.jboss.tools.vpe.editor.template.textformating.TextFormatingData;
 import org.jboss.tools.vpe.editor.toolbar.format.handler.FormatHandler;
@@ -41,10 +34,11 @@ import org.jboss.tools.vpe.editor.toolbar.format.handler.IFormatHandler;
  * This manager set format toolbar items to enabled/disabled status after selection changing.
  * @author Igels
  */
+@SuppressWarnings("restriction")
 public class FormatControllerManager {
 
-	private VpeController vpeController = null;
-	private List formatControllers = new ArrayList();
+	private VisualController vpeController = null;
+	private List<IFormatController> formatControllers = new ArrayList<IFormatController>();
 	private HandlerFactory handlerFactory;
 
 	private FormatData currentFormatData;
@@ -65,7 +59,7 @@ public class FormatControllerManager {
 	/**
 	 * @param vpeController
 	 */
-	public void setVpeController(VpeController vpeController) {
+	public void setVpeController(VisualController vpeController) {
 		this.vpeController = vpeController;
 	}
 
@@ -74,7 +68,7 @@ public class FormatControllerManager {
 	 * Set format toolbar items to enabled/disabled status.
 	 */
 	public void selectionChanged() {
-		List cleanNodesList = getCleanSelectedNodesList();
+		List<SelectedNodeInfo> cleanNodesList = getCleanSelectedNodesList();
 		if(cleanNodesList.size()==1) {
 			SelectedNodeInfo newNodeInfo = (SelectedNodeInfo)cleanNodesList.get(0);
 			if(newNodeInfo!=null) {
@@ -83,7 +77,7 @@ public class FormatControllerManager {
 					 ElementImpl elementImpl = (ElementImpl)newNode;
 					 int startOffset = elementImpl.getStartOffset();
 					 int startEndOffset = elementImpl.getStartEndOffset();
-					 StructuredTextViewer viewer = getVpeController().getPageContext().getSourceBuilder().getStructuredTextViewer();
+					 StructuredTextViewer viewer = getVpeController().getSourceEditor().getTextViewer();//getPageContext().getSourceBuilder().getStructuredTextViewer();
 					 try {
 						String newSelectedTagValue = viewer.getDocument().get(startOffset, startEndOffset-startOffset);
 						if(currentSelectedTagValue!=null && currentSelectedTagValue.equals(newSelectedTagValue)) {
@@ -215,22 +209,22 @@ public class FormatControllerManager {
 	 * @return
 	 */
 	public TextFormatingData getFormatTemplateForTag(Node node) {
-		VpeDomMapping domMapping = vpeController.getDomMapping();
-		if(node==null) {
-			return null;
-		}
-
-		VpeNodeMapping nodeMapping = domMapping.getNodeMapping(node);
-		if(nodeMapping instanceof VpeElementMapping) {
-			VpeElementMapping elementMapping = (VpeElementMapping)nodeMapping;
-
-			VpeTemplate template = elementMapping.getTemplate();
-			if(template!=null) {
-				return template.getTextFormattingData();
-			}
-		} else {
-			// Selected node is text.
-		}
+//		VpeDomMapping domMapping = vpeController.getDomMapping();
+//		if(node==null) {
+//			return null;
+//		}
+//
+//		VpeNodeMapping nodeMapping = domMapping.getNodeMapping(node);
+//		if(nodeMapping instanceof VpeElementMapping) {
+//			VpeElementMapping elementMapping = (VpeElementMapping)nodeMapping;
+//
+//			VpeTemplate template = elementMapping.getTemplate();
+//			if(template!=null) {
+//				return template.getTextFormattingData();
+//			}
+//		} else {
+//			// Selected node is text.
+//		}
 		return null;
 	}
 
@@ -238,27 +232,27 @@ public class FormatControllerManager {
 	 * @return
 	 */
 	public SelectedNodeInfo computeSelectedNode() {
-		List nodes = getCleanSelectedNodesList();
+		List<SelectedNodeInfo> nodes = getCleanSelectedNodesList();
 		if(nodes.size()==0) {
 			return null;
 		}
 		return (SelectedNodeInfo)nodes.get(0);
 	}
 
-	private List getCleanSelectedNodesList() {
+	private List<SelectedNodeInfo> getCleanSelectedNodesList() {
 		SourceSelection selection = getSelection();
 		if(selection==null) {
-			return new ArrayList();
+			return new ArrayList<SelectedNodeInfo>();
 		}
 		List dirtyNodesList = selection.getSelectedNodes();
-		List cleanNodesList = getCleanSelectedNodesList(dirtyNodesList);
+		List<SelectedNodeInfo> cleanNodesList = getCleanSelectedNodesList(dirtyNodesList);
 		return cleanNodesList;
 	}
 
-	private List getCleanSelectedNodesList(List dirtyNodesList) {
-		ArrayList nodes = new ArrayList(dirtyNodesList.size());
-		HashSet parentNodes = new HashSet();
-		for(int i=0; i<dirtyNodesList.size(); i++) {
+	private List<SelectedNodeInfo> getCleanSelectedNodesList(List dirtyNodesList) {
+		ArrayList<SelectedNodeInfo> nodes = new ArrayList<SelectedNodeInfo>(dirtyNodesList.size());
+		HashSet<Node> parentNodes = new HashSet<Node>();
+		for (int i = 0; i < dirtyNodesList.size(); i++) {
 			SelectedNodeInfo nodeInfo = (SelectedNodeInfo)dirtyNodesList.get(i);
 			Node node = nodeInfo.getNode();
 			if(parentNodes.contains(node.getParentNode())) {
@@ -303,7 +297,7 @@ public class FormatControllerManager {
 	/**
 	 * @return
 	 */
-	public VpeController getVpeController() {
+	public VisualController getVpeController() {
 		return vpeController;
 	}
 

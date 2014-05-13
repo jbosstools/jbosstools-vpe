@@ -12,6 +12,7 @@ package org.jboss.tools.vpe.preview.core.transform;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketException;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.xml.parsers.ParserConfigurationException;

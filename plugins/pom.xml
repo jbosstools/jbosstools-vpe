@@ -24,5 +24,6 @@
 		<module>org.jboss.tools.xulrunner.initializer</module>
 		<module>org.jboss.tools.vpe.preview</module>
 		<module>org.jboss.tools.vpe.preview.core</module>
+		<module>org.jboss.tools.vpe.preview.editor</module>
 	</modules>
 </project>
