@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.7.0",
  org.mozilla.xpcom,
  org.jboss.tools.vpe.xulrunner,
  org.jboss.tools.common.text.ext,
- org.jboss.tools.common.model.ui
+ org.jboss.tools.common.model.ui,
+ org.jboss.tools.vpe.preview.editor;bundle-version="3.5.100"
 Export-Package: org.jboss.tools.vpe.base.test
 Bundle-Activator: org.jboss.tools.vpe.base.test.VPEBaseTestPlugin
 Bundle-ActivationPolicy: lazy
