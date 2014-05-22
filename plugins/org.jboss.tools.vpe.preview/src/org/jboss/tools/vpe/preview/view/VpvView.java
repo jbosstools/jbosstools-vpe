@@ -49,6 +49,8 @@ import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
+import org.jboss.tools.usage.event.UsageEventType;
+import org.jboss.tools.usage.event.UsageReporter;
 import org.jboss.tools.vpe.preview.Activator;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModel;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
@@ -74,9 +76,10 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private IEditorPart currentEditor;
 	private IDocumentListener documentListener;
 
-
 	public VpvView() {
 		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
+		UsageEventType eventType = Activator.getDefault().getPreviewEventType();
+		UsageReporter.getInstance().countEvent(eventType.event(UsageEventType.OPEN_ACTION));
 	}
 
 	@Override

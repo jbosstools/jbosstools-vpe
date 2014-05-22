@@ -169,6 +169,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 	public void setVisualMode(int type) {
 		switch (type) {
 		case VISUALSOURCE_MODE:
+			VpePlugin.getDefault().countVpvTabEvent();
 			/*
 			 * https://jira.jboss.org/browse/JBIDE-6832
 			 * Restore the state after switching from Preview, for example.
@@ -207,6 +208,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 //			break;
 
 		case SOURCE_MODE:
+			VpePlugin.getDefault().countSourceTabEvent();
 //			selectionBar.setVisible(selectionBar.getAlwaysVisibleOption());
 			setVerticalToolbarVisible(false);
 			if (sourceContent != null) {
@@ -240,6 +242,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			break;
 
 		case PREVIEW_MODE:
+			VpePlugin.getDefault().countVpvTabEvent();
 //			if (selectionBar != null) {
 //				selectionBar.setVisible(false);
 //			}

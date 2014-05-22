@@ -12,14 +12,14 @@ package org.jboss.tools.vpe;
 
 import java.io.IOException;
 import java.net.URL;
+
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.ui.IStartup;
 import org.jboss.tools.common.log.BaseUIPlugin;
 import org.jboss.tools.common.log.IPluginLog;
 import org.jboss.tools.common.reporting.ProblemReportingHelper;
-import org.jboss.tools.vpe.xulrunner.XulRunnerException;
-import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
+import org.jboss.tools.usage.event.UsageEventType;
+import org.jboss.tools.usage.event.UsageReporter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -30,10 +30,17 @@ public class VpePlugin extends BaseUIPlugin {
 	public static final String PLUGIN_ID = "org.jboss.tools.vpe"; //$NON-NLS-1$
 	
 	public static final String EXTESION_POINT_VPE_TEMPLATES = "org.jboss.tools.vpe.templates"; //$NON-NLS-1$
-	
+
+	private static final String EDITOR_EVENT_ACTION = "editor"; //$NON-NLS-1$
+	private static final String SOURCE_EVENT_LABEL = "source"; //$NON-NLS-1$
+	private static final String VPE_EVENT_LABEL = "visual-vpe"; //$NON-NLS-1$
+	private static final String VPV_EVENT_LABEL = "visual-vpv"; //$NON-NLS-1$
+
 	//The shared instance.
 	private static VpePlugin plugin;
-	
+
+	private UsageEventType editorEventType;
+
 	/**
 	 * The constructor.
 	 */
@@ -49,6 +56,20 @@ public class VpePlugin extends BaseUIPlugin {
 		super.start(context);
 //		moved to vpe.xulrunner plug-in
 //		earlyStartup();
+		editorEventType = new UsageEventType(this, EDITOR_EVENT_ACTION, Messages.UsageEventTypeEditorLabelDescription, UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		UsageReporter.getInstance().registerEvent(editorEventType);
+	}
+
+	public void countSourceTabEvent() {
+		UsageReporter.getInstance().countEvent(editorEventType.event(SOURCE_EVENT_LABEL));
+	}
+
+	public void countVpeTabEvent() {
+		UsageReporter.getInstance().countEvent(editorEventType.event(VPE_EVENT_LABEL));
+	}
+
+	public void countVpvTabEvent() {
+		UsageReporter.getInstance().countEvent(editorEventType.event(VPV_EVENT_LABEL));
 	}
 
 	/**

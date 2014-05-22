@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jboss.tools.usage.event.UsageEventType;
+import org.jboss.tools.usage.event.UsageReporter;
 import org.jboss.tools.vpe.preview.core.server.VpvServer;
 import org.jboss.tools.vpe.preview.core.transform.VpvController;
 import org.jboss.tools.vpe.preview.core.transform.VpvDomBuilder;
@@ -33,6 +35,7 @@ public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.jboss.tools.vpe.preview"; //$NON-NLS-1$
+	private static final String PREVIEW_EVENT_ACTION = "preview"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
@@ -42,7 +45,9 @@ public class Activator extends AbstractUIPlugin {
 	private VpvVisualModelHolderRegistry visualModelHolderRegistry;
 
 	private VpvDomBuilder domBuilder;
-	
+
+	private UsageEventType previewEventType;
+
 	/**
 	 * The constructor
 	 */
@@ -62,6 +67,12 @@ public class Activator extends AbstractUIPlugin {
 		visualModelHolderRegistry = new VpvVisualModelHolderRegistry();
 		VpvController vpvController = new VpvController(domBuilder, visualModelHolderRegistry);
 		server = new VpvServer(vpvController);
+		previewEventType = new UsageEventType(this, PREVIEW_EVENT_ACTION, Messages.UsageEventTypePreviewLabelDescription, UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		UsageReporter.getInstance().registerEvent(previewEventType);
+	}
+
+	public UsageEventType getPreviewEventType() {
+		return previewEventType;
 	}
 
 	/*
