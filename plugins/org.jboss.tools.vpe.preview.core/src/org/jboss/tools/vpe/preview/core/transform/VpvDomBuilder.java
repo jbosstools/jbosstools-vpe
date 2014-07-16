@@ -86,6 +86,8 @@ public class VpvDomBuilder {
 		Node visualNode = creationData.getVisualNode();
 		if (visualNode != null) {
 			sourceVisualMapping.put(sourceNode, visualNode);
+		} else {
+			return null;
 		}
 		
 		VpeElementData elementData = creationData.getElementData();
