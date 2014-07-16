@@ -29,7 +29,7 @@ public class VpvDefaultTemplate implements VpeTemplate {
 	public VpeCreationData create(Node sourceNode, Document visualDocument) {
 		Node visualNode = null;
 		
-		short sourceNodeType = sourceNode.getNodeType();
+		short sourceNodeType = sourceNode != null ? sourceNode.getNodeType() : -1;
 		if (sourceNodeType == Node.ELEMENT_NODE) {
 			Element visualElement = visualDocument.createElement(sourceNode.getNodeName());
 			NamedNodeMap sourceNodeAttributes = sourceNode.getAttributes();
