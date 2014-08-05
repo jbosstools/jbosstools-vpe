@@ -380,7 +380,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 			browser.addLocationListener(new LocationAdapter() {
 				@Override
 				public void changed(LocationEvent event) {
-					NavigationUtil.disableAlert(browser);
+					NavigationUtil.disableJsPopUps(browser);
 					NavigationUtil.disableLinks(browser);
 					NavigationUtil.disableInputs(browser);
 					
