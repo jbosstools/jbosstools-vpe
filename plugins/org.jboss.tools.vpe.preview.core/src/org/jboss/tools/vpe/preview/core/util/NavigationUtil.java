@@ -106,6 +106,14 @@ public final class NavigationUtil {
 		browser.execute("window.alert = function() {};"); //$NON-NLS-1$
 	}
 	
+	public static String removeAnchor(String url) {
+		int index = url.lastIndexOf('#');
+		if (index != -1) {
+		    url = url.substring(0, index);
+		} 
+		return url;
+	}
+	
 	public static void navigateToVisual(IEditorPart currentEditor, Browser browser, VpvVisualModel visualModel, int x, int y) {
 		String stringToEvaluate = ""; //$NON-NLS-1$
 		if (OS.LINUX.equals(PlatformUtil.getOs())) {

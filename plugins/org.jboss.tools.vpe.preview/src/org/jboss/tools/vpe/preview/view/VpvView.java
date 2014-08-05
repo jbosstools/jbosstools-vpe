@@ -262,8 +262,10 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 
 	private void refresh(Browser browser) {
-		browser.setUrl(browser.getUrl());
+		String url = NavigationUtil.removeAnchor(browser.getUrl());
+		browser.setUrl(url);
 	}
+	
 
 	private ISelection getCurrentSelection() {
 		Activator activator = Activator.getDefault();

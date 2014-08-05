@@ -530,7 +530,8 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				if (browser != null && !browser.isDisposed()) {
-					browser.setUrl(browser.getUrl());
+					String url = NavigationUtil.removeAnchor(browser.getUrl());
+					browser.setUrl(url);
 				}
 				return Status.OK_STATUS;
 			}
