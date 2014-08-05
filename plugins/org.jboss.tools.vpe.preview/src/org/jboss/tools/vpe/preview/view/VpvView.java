@@ -112,7 +112,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 			browser.addLocationListener(new LocationAdapter() {
 				@Override
 				public void changed(LocationEvent event) {
-					NavigationUtil.disableAlert(browser);
+					NavigationUtil.disableJsPopUps(browser);
 					NavigationUtil.disableLinks(browser);
 					NavigationUtil.disableInputs(browser);
 

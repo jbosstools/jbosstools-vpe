@@ -102,8 +102,11 @@ public final class NavigationUtil {
 		}
 	}
 
-	public static void disableAlert(Browser browser) {
+	public static void disableJsPopUps(Browser browser) {
 		browser.execute("window.alert = function() {};"); //$NON-NLS-1$
+		browser.execute("window.confirm = function() {};"); //$NON-NLS-1$
+		browser.execute("window.prompt = function() {};"); //$NON-NLS-1$
+		browser.execute("window.open = function() {};"); //$NON-NLS-1$
 	}
 	
 	public static String removeAnchor(String url) {
