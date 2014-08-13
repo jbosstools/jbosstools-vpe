@@ -16,10 +16,8 @@ package org.jboss.tools.vpe.preview.core.util;
 public enum SuitableFileExtensions {
 	HTML("html"), //$NON-NLS-1$
 	HTM("htm"), //$NON-NLS-1$
-	XHTML("xhtml"), //$NON-NLS-1$
 	CSS("css"), //$NON-NLS-1$
-	JS("js"), //$NON-NLS-1$
-	JSP("jsp"); //$NON-NLS-1$
+	JS("js"); //$NON-NLS-1$
 
 	private final String value;
 

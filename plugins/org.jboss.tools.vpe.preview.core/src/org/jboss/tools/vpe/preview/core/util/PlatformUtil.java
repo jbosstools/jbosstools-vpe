@@ -38,4 +38,9 @@ public final class PlatformUtil {
 		}
 		return detectedOs;
 	}
+	
+	public static boolean isWindows() {
+		return OS.WINDOWS.equals(getOs());
+	}
+	
 }

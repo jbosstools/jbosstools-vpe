@@ -74,9 +74,10 @@ import org.jboss.tools.vpe.preview.core.exceptions.CannotOpenExternalFileExcepti
 import org.jboss.tools.vpe.preview.core.exceptions.Messages;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModel;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
-import org.jboss.tools.vpe.preview.core.util.ActionBarUtil;
+import org.jboss.tools.vpe.preview.core.util.ActionBar;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
+import org.jboss.tools.vpe.preview.core.util.PlatformUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
 
 /**
@@ -154,7 +155,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	private IEditorPart sourceEditor;
 	private Job currentJob;
 	
-	private ActionBarUtil actionBarUtil;
+	private ActionBar actionBar;
 	protected BrowserErrorWrapper errorWrapper = new BrowserErrorWrapper();
 	
 	public VpvEditor() {
@@ -317,8 +318,8 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	}
 	
 	public void addPreviewToolbarItems() {
-		actionBarUtil = new ActionBarUtil(browser, WebUiPlugin.getDefault().getPreferenceStore());
-		actionBarUtil.fillLocalToolBar(toolBarManager);
+		actionBar = new ActionBar(browser, WebUiPlugin.getDefault().getPreferenceStore());
+		actionBar.fillLocalToolBar(toolBarManager);
 		toolBarManager.update(true);
 	}
 	
@@ -495,6 +496,14 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 //		browser.setUrl(browser.getUrl());
 	}
 	
+	public void refresh(Browser browser) {
+		String url = browser.getUrl();
+		if (PlatformUtil.isWindows()) {
+			url = NavigationUtil.removeAnchor(url);
+		}
+		browser.setUrl(url);
+	}
+	
 	private void formRequestToServer() {
 		IFile ifile = EditorUtil.getFileOpenedInEditor(sourceEditor);
 		if (ifile != null && SuitableFileExtensions.contains(ifile.getFileExtension().toString())) {
@@ -530,8 +539,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				if (browser != null && !browser.isDisposed()) {
-					String url = NavigationUtil.removeAnchor(browser.getUrl());
-					browser.setUrl(url);
+					refresh(browser);
 				}
 				return Status.OK_STATUS;
 			}
@@ -658,7 +666,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 
 				@Override
 				public void documentChanged(DocumentEvent event) {
-					if (actionBarUtil.isAutomaticRefreshEnabled() && controller.isVisualEditorVisible()) {
+					if (actionBar.isAutomaticRefreshEnabled() && controller.isVisualEditorVisible()) {
 						updatePreview();
 					}
 				}

@@ -19,7 +19,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.jboss.tools.vpe.preview.core.Activator;
 
-public class ActionBarUtil {
+public class ActionBar {
 	private static final String GROUP_REFRESH = "org.jboss.tools.vpv.refresh"; //$NON-NLS-1$
 	private static final String REFRESH_ON_SAVE_ENABLEMENT = "org.jboss.tools.vpe.enableRefreshOnSave"; //$NON-NLS-1$
 
@@ -37,7 +37,7 @@ public class ActionBarUtil {
 	private Command saveCommand;
 	private Command saveAllCommand;
 	
-	public ActionBarUtil(Browser browser1, IPreferenceStore preferences) {
+	public ActionBar(Browser browser1, IPreferenceStore preferences) {
 		this.browser = browser1;
 		this.preferences = preferences;
 		enableAutomaticRefresh = !preferences.getBoolean(REFRESH_ON_SAVE_ENABLEMENT);
@@ -81,6 +81,14 @@ public class ActionBarUtil {
 		makeOpenInDefaultBrowserAction();
 		makeEnableAutomaticRefreshAction();
 		makeEnableRefreshOnSaveAction();
+	}
+	
+	protected void refresh(Browser browser) {
+		String url = browser.getUrl();
+		if (PlatformUtil.isWindows()) {
+			url = NavigationUtil.removeAnchor(url);
+		}
+		browser.setUrl(url);
 	}
 
 	private void makeEnableAutomaticRefreshAction() {
@@ -155,10 +163,6 @@ public class ActionBarUtil {
 		refreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh.gif")); //$NON-NLS-1$
 	}
 	
-	private void refresh(Browser browser) {
-		String url = NavigationUtil.removeAnchor(browser.getUrl());
-		browser.setUrl(url);
-	}
 	
 	public boolean isAutomaticRefreshEnabled() {
 		return enableAutomaticRefresh;
