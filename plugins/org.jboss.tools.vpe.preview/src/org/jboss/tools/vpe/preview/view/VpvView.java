@@ -60,21 +60,22 @@ import org.jboss.tools.vpe.preview.core.exceptions.CannotOpenExternalFileExcepti
 import org.jboss.tools.vpe.preview.core.exceptions.Messages;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModel;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
-import org.jboss.tools.vpe.preview.core.util.ActionBarUtil;
+import org.jboss.tools.vpe.preview.core.util.ActionBar;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
+import org.jboss.tools.vpe.preview.core.util.PlatformUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
+import org.jboss.tools.vpe.preview.util.ViewActionBar;
 
 /**
  * @author Yahor Radtsevich (yradtsevich)
  * @author Ilya Buziuk (ibuziuk)
  */
-@SuppressWarnings("restriction")
 public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	public static final String ID = "org.jboss.tools.vpe.vpv.view.VpvView"; //$NON-NLS-1$
 
 	private Browser browser;
-	private ActionBarUtil actionBarUtil;
+	private ActionBar actionBar;
 	private Job currentJob;
 	private VpvVisualModel visualModel;
 	private int modelHolderId;
@@ -98,6 +99,9 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		}
 		if (selectionListener != null) {
 			getSite().getPage().removePostSelectionListener(selectionListener);			
+		}
+		if (actionBar != null) {
+			actionBar.dispose();
 		}
 		Activator.getDefault().getVisualModelHolderRegistry().unregisterHolder(this);
 		super.dispose();
@@ -133,8 +137,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 			inizializeEditorListener(browser, modelHolderId);
 	
 			IActionBars bars = getViewSite().getActionBars();
-			actionBarUtil = new ActionBarUtil(browser, Activator.getDefault().getPreferenceStore());
-			actionBarUtil.fillLocalToolBar(bars.getToolBarManager());
+			actionBar = new ViewActionBar(browser, Activator.getDefault().getPreferenceStore(), this);
+			actionBar.fillLocalToolBar(bars.getToolBarManager());
 		} catch (Throwable t) {
 			errorWrapper.showError(parent, t);
 		}
@@ -171,6 +175,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 
 	public void editorChanged(IEditorPart editor) {
+		changeControlVisibility(browser, true);
+		browser.getParent().setLayout(new FillLayout());
 		if (currentEditor == editor) {
 			// do nothing
 		} else if (editor == null) {
@@ -220,7 +226,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 				@Override
 				public void documentChanged(DocumentEvent event) {
-					if (actionBarUtil.isAutomaticRefreshEnabled()) {
+					if (actionBar.isAutomaticRefreshEnabled()) {
 						String fileExtension = EditorUtil.getFileExtensionFromEditor(currentEditor);
 						if (SuitableFileExtensions.isCssOrJs(fileExtension)) {
 							currentEditor.doSave(new NullProgressMonitor()); // saving all js and css stuff
@@ -262,11 +268,19 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 
 	private void refresh(Browser browser) {
-		String url = NavigationUtil.removeAnchor(browser.getUrl());
-		browser.setUrl(url);
+		String url = browser.getUrl();
+		if (PlatformUtil.isWindows()) {
+			String ext = EditorUtil.getFileExtensionFromEditor(currentEditor);
+			if (SuitableFileExtensions.isCssOrJs(ext)) {
+				browser.refresh(); // Files are saved - need to perform refresh
+			} else {
+				browser.setUrl(NavigationUtil.removeAnchor(url)); // JBIDE-18043 Need to get changes via VPVSocketProcessor 
+			}	
+		} else {
+			browser.setUrl(url);
+		}
 	}
-	
-
+		
 	private ISelection getCurrentSelection() {
 		Activator activator = Activator.getDefault();
 		IWorkbench workbench = activator.getWorkbench();
@@ -289,12 +303,12 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		removeErrorMessage();
 		if (file != null && file.exists()) {
 			fileExtension = file.getFileExtension();
-			changeControlVisibility(browser, true);
-			browser.getParent().setLayout(new FillLayout());
 		} else {
-			changeControlVisibility(browser, false);
-			errorWrapper.showError(browser.getParent(), 
+			if (editor != null) { //nothing opened - no error message
+				changeControlVisibility(browser, false);
+				errorWrapper.showError(browser.getParent(), 
 					new CannotOpenExternalFileException(MessageFormat.format(Messages.CANNOT_SHOW_EXTERNAL_FILE, VISUAL_PREVIEW)));
+			}
 		}
 		browser.getParent().layout();
 		
