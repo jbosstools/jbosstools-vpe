@@ -19,8 +19,7 @@ public enum SuitableFileExtensions {
 	CSS("css"), //$NON-NLS-1$
 	JS("js"), //$NON-NLS-1$
 	JSP("jsp"), //$NON-NLS-1$
-	XML("xml"), //$NON-NLS-1$
-	JS("js"); //$NON-NLS-1$
+	XML("xml"); //$NON-NLS-1$
 
 	private final String value;
 
