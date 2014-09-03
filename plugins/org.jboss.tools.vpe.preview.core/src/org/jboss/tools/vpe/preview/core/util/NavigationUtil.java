@@ -40,15 +40,20 @@ public final class NavigationUtil {
 	public static void disableLinks(Browser browser) {
 		if (browser != null && !browser.isDisposed()) {
 			// IE can't handle 'javascript: void(0);' - JBIDE-18091 StackOverflow error
-			String disableHrefScript = (PlatformUtil.isWindows()) ? "'#'" : "'javascript: void(0);'";  //$NON-NLS-1$ //$NON-NLS-2$ 			
+			String disableHrefScript = (PlatformUtil.isWindows()) ? "'#'" : "'javascript: void(0);'";  //$NON-NLS-1$ //$NON-NLS-2$ 	
+			String disablerScript = "var anchors = document.getElementsByTagName('a');" + //$NON-NLS-1$
+									"for (var i = 0; i < anchors.length; i++) {" + //$NON-NLS-1$
+										// need to disable all links except local links with anchor(which is used for one-page-app)
+										"if (anchors[i].href.indexOf('#') == -1 || anchors[i].href.indexOf('://localhost:') == -1) {" + //$NON-NLS-1$
+											"anchors[i].href = " + disableHrefScript + ";" + //$NON-NLS-1$ //$NON-NLS-2$
+											"anchors[i].target = '';" + //$NON-NLS-1$
+										"}" +  //$NON-NLS-1$
+									"};"; //$NON-NLS-1$			
 			browser.execute("(setTimeout(function() { " +  //$NON-NLS-1$
-								"var anchors = document.getElementsByTagName('a');" + //$NON-NLS-1$
-								"for (var i = 0; i < anchors.length; i++) {" + //$NON-NLS-1$
-									"anchors[i].href = " + disableHrefScript + ";" + //$NON-NLS-1$ //$NON-NLS-2$
-									"anchors[i].target = '';" + //$NON-NLS-1$
-								"};" + //$NON-NLS-1$
+								disablerScript +	
 					  		"}, 10))();"); //$NON-NLS-1$
-		}
+			disableDynamic(browser, disablerScript);
+		}		
 	}
 	
 	public static void disableInputs(Browser browser) {
