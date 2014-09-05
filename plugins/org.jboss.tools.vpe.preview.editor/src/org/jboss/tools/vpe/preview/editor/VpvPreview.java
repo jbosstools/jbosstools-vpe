@@ -1,6 +1,5 @@
 package org.jboss.tools.vpe.preview.editor;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.layout.GridData;
@@ -12,9 +11,7 @@ public class VpvPreview extends VpvEditor {
 	private EditorLoadWindowListener editorLoadWindowListener;
 
 	public VpvPreview(IEditorPart sourceEditor) {
-		setSourceEditor(sourceEditor);
-		// XXX: this code avoids NPE into JSP editor. Need to handle this error better
-		sourceEditor.getAdapter(IDocument.class);
+		this.sourceEditor = sourceEditor;
 	}
 	
 	@Override

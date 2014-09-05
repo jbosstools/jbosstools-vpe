@@ -160,7 +160,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	private VpvVisualModel visualModel;
 	private int modelHolderId;
 	private SelectionListener selectionListener;
-	private IEditorPart sourceEditor;
+	protected IEditorPart sourceEditor;
 	private Job currentJob;
 	
 	private ActionBar actionBar;
