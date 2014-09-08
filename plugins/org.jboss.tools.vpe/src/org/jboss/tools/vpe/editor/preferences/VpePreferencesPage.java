@@ -63,7 +63,8 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 	private Group visualAppearanceGroup;
 	private Group confirmationGroup;
 	private Group tabsGroup;
-	private Group visualEditorToolbarGroup;
+	//JBIDE-18275 Visual Editor: remove option of showing VPE toolbar in Eclipse toolbar
+//	private Group visualEditorToolbarGroup;
 
 	private ICommandService commandService = null;
 	
@@ -96,9 +97,9 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 		pageContainer.setLayout(layout);
 		pageContainer.setLayoutData(gd);
 		
-		visualEditorToolbarGroup = createLayoutGroup(pageContainer,
-				SWT.SHADOW_ETCHED_IN,
-				VpeUIMessages.VISUAL_EDITOR_TOOLBAR_BEHAVIOR);
+//		visualEditorToolbarGroup = createLayoutGroup(pageContainer,
+//				SWT.SHADOW_ETCHED_IN,
+//				VpeUIMessages.VISUAL_EDITOR_TOOLBAR_BEHAVIOR);
 		
 		visualAppearanceGroup = createLayoutGroup(pageContainer,
 				SWT.SHADOW_ETCHED_IN,
@@ -126,9 +127,9 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 
 	@Override
 	protected void createFieldEditors() {
-		addField(new VpeBooleanFieldEditor(SHOW_VISUAL_TOOLBAR,
-				VpeUIMessages.SHOW_VPE_TOOLBAR,
-				visualEditorToolbarGroup));
+//		addField(new VpeBooleanFieldEditor(SHOW_VISUAL_TOOLBAR,
+//				VpeUIMessages.SHOW_VPE_TOOLBAR,
+//				visualEditorToolbarGroup));
 		addField(new VpeBooleanFieldEditor(SHOW_BORDER_FOR_UNKNOWN_TAGS,
 				VpeUIMessages.SHOW_BORDER_FOR_UNKNOWN_TAGS,
 				visualAppearanceGroup));

@@ -15,9 +15,11 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditorFactory;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.editor.util.VpePlatformUtil;
 
@@ -27,7 +29,9 @@ import org.jboss.tools.vpe.editor.util.VpePlatformUtil;
 
 public class VpeEditorPartFactory implements IVisualEditorFactory {	
 	public IVisualEditor createVisualEditor(final EditorPart multiPageEditor, StructuredTextEditor textEditor, int visualMode, BundleMap bundleMap) {
-		//this property is added in VPE tests to make VPE always opened 
+	    //Since we do not implement the option of showing Visual toolbar for preview editor into Eclipse toolbar - must always show visual toolbar within the editor
+	    WebUiPlugin.getDefault().getPreferenceStore().setValue(IVpePreferencesPage.SHOW_VISUAL_TOOLBAR, true);
+	    //this property is added in VPE tests to make VPE always opened 
 		if (VpePlatformUtil.isXulrunnerEnabled()) {
 			return getVpeEditor(multiPageEditor, textEditor, visualMode, bundleMap);
 		}
