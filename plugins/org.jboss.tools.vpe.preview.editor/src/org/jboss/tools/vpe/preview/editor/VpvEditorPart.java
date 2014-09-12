@@ -210,6 +210,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			VpePlugin.getDefault().countVpvTabEvent();
 			setVerticalToolbarVisible(false);
 			if (previewContent != null) {
+			    vpvPreview.refresh(vpvPreview.getBrowser());
 				previewContent.setVisible(true);
 				if (vpvPreview != null) {
 					activeEditor = vpvPreview;
