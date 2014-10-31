@@ -46,4 +46,8 @@ public final class PlatformUtil {
 	public static boolean isMacOS() {
 		return OS.MACOS.equals(getOs());
 	}
+	
+	public static boolean isLinux() {
+		return OS.LINUX.equals(getOs());
+	}
 }

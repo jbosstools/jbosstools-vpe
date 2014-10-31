@@ -12,6 +12,7 @@ package org.jboss.tools.vpe.editor.preferences;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.State;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
@@ -19,6 +20,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -32,6 +34,7 @@ import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.bar.SelectionBarHandler;
 import org.jboss.tools.vpe.VpePlugin;
+import org.jboss.tools.vpe.editor.util.VpePlatformUtil;
 import org.jboss.tools.vpe.handlers.ScrollLockSourceVisualHandler;
 import org.jboss.tools.vpe.handlers.ShowBorderHandler;
 import org.jboss.tools.vpe.handlers.ShowBundleAsELHandler;
@@ -65,12 +68,15 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 	private Group tabsGroup;
 	//JBIDE-18275 Visual Editor: remove option of showing VPE toolbar in Eclipse toolbar
 //	private Group visualEditorToolbarGroup;
+	private Group visualEditorEngineGroup;
+	private boolean iswebkit;
 
 	private ICommandService commandService = null;
 	
 	public VpePreferencesPage() {
 		super();
 		setPreferenceStore(getPreferenceStore());
+		iswebkit = WebUiPlugin.getDefault().getPreferenceStore().getBoolean(USE_VISUAL_EDITOR_FOR_HTML5);
 	}
 
 	public void init(IWorkbench workbench) {
@@ -100,7 +106,11 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 //		visualEditorToolbarGroup = createLayoutGroup(pageContainer,
 //				SWT.SHADOW_ETCHED_IN,
 //				VpeUIMessages.VISUAL_EDITOR_TOOLBAR_BEHAVIOR);
-		
+		if (VpePlatformUtil.xulrunnerCanBeLoadedOnLinux()) {
+			visualEditorEngineGroup = createLayoutGroup(pageContainer,
+					SWT.SHADOW_ETCHED_IN,
+					VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_GROUP_TITLE);
+		}
 		visualAppearanceGroup = createLayoutGroup(pageContainer,
 				SWT.SHADOW_ETCHED_IN,
 				VpeUIMessages.VISUAL_APPEARANCE_GROUP_TITLE);
@@ -130,7 +140,14 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 //		addField(new VpeBooleanFieldEditor(SHOW_VISUAL_TOOLBAR,
 //				VpeUIMessages.SHOW_VPE_TOOLBAR,
 //				visualEditorToolbarGroup));
-		addField(new VpeBooleanFieldEditor(SHOW_BORDER_FOR_UNKNOWN_TAGS,
+	    if (VpePlatformUtil.xulrunnerCanBeLoadedOnLinux()) {
+			String[][] labelsAndValues = new String[][] {
+					{ VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_JSF, String.valueOf(false) },
+					{ VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HTML5, String.valueOf(true) } };
+		    addField(new VpeRadioGroupFieldEditor(USE_VISUAL_EDITOR_FOR_HTML5,
+		    		VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HEADER, 1, labelsAndValues, visualEditorEngineGroup));
+	    }
+	    addField(new VpeBooleanFieldEditor(SHOW_BORDER_FOR_UNKNOWN_TAGS,
 				VpeUIMessages.SHOW_BORDER_FOR_UNKNOWN_TAGS,
 				visualAppearanceGroup));
 		addField(new VpeBooleanFieldEditor(SHOW_NON_VISUAL_TAGS,
@@ -168,56 +185,70 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 
 	@Override
 	public boolean performOk() {
-		super.performOk();
-		IEditorReference[] editors = VpePlugin.getDefault().getWorkbench()
-				.getActiveWorkbenchWindow().getActivePage()
-				.getEditorReferences();
-		for (IEditorReference editor : editors) {
-			IEditorPart editorPart = editor.getEditor(false);
-			if ((editorPart != null)
-					&& (editorPart instanceof JSPMultiPageEditor)) {
-				JSPMultiPageEditor mpe = (JSPMultiPageEditor) editorPart;
-				IVisualEditor visualEditor = (mpe).getVisualEditor();
-				//if (visualEditor instanceof VpeEditorPart) {
-				//	VpeEditorPart vep = (VpeEditorPart) visualEditor;
-					/*
-					 * Update visual editor
-					 */
-				visualEditor.updatePartAccordingToPreferences();
-					/*
-					 * Change selected tab Commented to fix
-					 * https://jira.jboss.org/jira/browse/JBIDE-4941 Do not
-					 * update VPE splitting, weights, tabs for current page,
-					 * only for newly opened.
-					 */
-					// mpe.updatePartAccordingToPreferences();
-					
-					/*
-					 * https://issues.jboss.org/browse/JBIDE-10745
-					 */
-					boolean presfShowBorderForUnknownTags = WebUiPlugin.getDefault()
-							.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_BORDER_FOR_UNKNOWN_TAGS);
-					boolean prefsShowNonVisualTags = WebUiPlugin.getDefault()
-							.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_NON_VISUAL_TAGS);
-					boolean prefsShowSelectionBar = WebUiPlugin.getDefault()
-							.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_SELECTION_TAG_BAR);
-					boolean prefsShowTextFormattingBar = WebUiPlugin.getDefault()
-							.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_TEXT_FORMATTING);
-					boolean prefsShowBundlesAsEL = WebUiPlugin.getDefault()
-							.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_RESOURCE_BUNDLES_USAGE_AS_EL);
-					boolean prefsSynchronizeScrolling = WebUiPlugin.getDefault()
-							.getPreferenceStore().getBoolean(IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES);
-					
-					setCommandToggleState(ShowBorderHandler.COMMAND_ID, presfShowBorderForUnknownTags);
-					setCommandToggleState(ShowNonVisualTagsHandler.COMMAND_ID, prefsShowNonVisualTags);
-					setCommandToggleState(SelectionBarHandler.COMMAND_ID, prefsShowSelectionBar);
-					setCommandToggleState(ShowTextFormattingHandler.COMMAND_ID, prefsShowTextFormattingBar);
-					setCommandToggleState(ShowBundleAsELHandler.COMMAND_ID, prefsShowBundlesAsEL);
-					setCommandToggleState(ScrollLockSourceVisualHandler.COMMAND_ID, prefsSynchronizeScrolling);
-				//}
+	    super.performOk();
+	    boolean we = WebUiPlugin.getDefault().getPreferenceStore().getBoolean(USE_VISUAL_EDITOR_FOR_HTML5);
+	    if (VpePlatformUtil.xulrunnerCanBeLoadedOnLinux() && we != iswebkit) {
+	    	if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), VpeUIMessages.VISUAL_EDITOR_ENGINE_RESTART_CONFIRM, VpeUIMessages.VISUAL_EDITOR_ENGINE_RESTART_CONFIRM_MESSAGE) ){
+	    		Display.getDefault().asyncExec(new Runnable() {
+	    			public void run() {
+	    				PlatformUI.getWorkbench().restart();
+	    			}
+	    		});	    		
+	    	} else {
+	    		return false;
+	    	}
+	    } else {
+			IEditorReference[] editors = VpePlugin.getDefault().getWorkbench()
+					.getActiveWorkbenchWindow().getActivePage()
+					.getEditorReferences();
+			for (IEditorReference editor : editors) {
+				IEditorPart editorPart = editor.getEditor(false);
+				if ((editorPart != null)
+						&& (editorPart instanceof JSPMultiPageEditor)) {
+					JSPMultiPageEditor mpe = (JSPMultiPageEditor) editorPart;
+					IVisualEditor visualEditor = (mpe).getVisualEditor();
+					//if (visualEditor instanceof VpeEditorPart) {
+					//	VpeEditorPart vep = (VpeEditorPart) visualEditor;
+						/*
+						 * Update visual editor
+						 */
+					visualEditor.updatePartAccordingToPreferences();
+						/*
+						 * Change selected tab Commented to fix
+						 * https://jira.jboss.org/jira/browse/JBIDE-4941 Do not
+						 * update VPE splitting, weights, tabs for current page,
+						 * only for newly opened.
+						 */
+						// mpe.updatePartAccordingToPreferences();
+						
+						/*
+						 * https://issues.jboss.org/browse/JBIDE-10745
+						 */
+						boolean presfShowBorderForUnknownTags = WebUiPlugin.getDefault()
+								.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_BORDER_FOR_UNKNOWN_TAGS);
+						boolean prefsShowNonVisualTags = WebUiPlugin.getDefault()
+								.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_NON_VISUAL_TAGS);
+						boolean prefsShowSelectionBar = WebUiPlugin.getDefault()
+								.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_SELECTION_TAG_BAR);
+						boolean prefsShowTextFormattingBar = WebUiPlugin.getDefault()
+								.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_TEXT_FORMATTING);
+						boolean prefsShowBundlesAsEL = WebUiPlugin.getDefault()
+								.getPreferenceStore().getBoolean(IVpePreferencesPage.SHOW_RESOURCE_BUNDLES_USAGE_AS_EL);
+						boolean prefsSynchronizeScrolling = WebUiPlugin.getDefault()
+								.getPreferenceStore().getBoolean(IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES);
+						
+						
+						setCommandToggleState(ShowBorderHandler.COMMAND_ID, presfShowBorderForUnknownTags);
+						setCommandToggleState(ShowNonVisualTagsHandler.COMMAND_ID, prefsShowNonVisualTags);
+						setCommandToggleState(SelectionBarHandler.COMMAND_ID, prefsShowSelectionBar);
+						setCommandToggleState(ShowTextFormattingHandler.COMMAND_ID, prefsShowTextFormattingBar);
+						setCommandToggleState(ShowBundleAsELHandler.COMMAND_ID, prefsShowBundlesAsEL);
+						setCommandToggleState(ScrollLockSourceVisualHandler.COMMAND_ID, prefsSynchronizeScrolling);
+					//}
+				}
 			}
-		}
-		return true;
+	    }
+	    return true;
 	}
 	
 	/**

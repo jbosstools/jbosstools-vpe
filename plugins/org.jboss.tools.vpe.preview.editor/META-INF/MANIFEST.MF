@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.ui,
  org.jboss.tools.vpe.resref,
  org.eclipse.compare,
  org.jboss.tools.common.model.ui,
- org.jboss.tools.vpe.xulrunner
+ org.jboss.tools.vpe.xulrunner,
+ org.eclipse.swt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

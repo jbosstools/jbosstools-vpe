@@ -20,6 +20,7 @@ public class VpeXulrunnerMessages extends NLS {
 	public static String XulRunnerBrowser_notAvailable;
 	public static String XulRunnerBrowser_wrongVersion;
 	public static String XulRunnerBrowser_embeddedXulRunnerIsDisabledByOption;
+	public static String XulRunnerBrowser_visualEditorCannotWorkWithWebkit;
 	public static String CURRENT_PLATFORM_IS_NOT_SUPPORTED;
 	static {
 		// initialize resource bundle

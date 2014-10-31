@@ -172,4 +172,18 @@ public final class VpeUIMessages extends NLS {
 	
 	public static String COULD_NOT_OPEN_VPE_RESOURCES_DIALOG;
 	public static String VPE_PREFERENCES_MENU_LABEL;
+	
+	public static String VISUAL_EDITOR_ENGINE_PREFERENCES_GROUP_TITLE;
+	public static String VISUAL_EDITOR_ENGINE_PREFERENCES_JSF;
+	public static String VISUAL_EDITOR_ENGINE_PREFERENCES_HTML5;
+	public static String VISUAL_EDITOR_ENGINE_PREFERENCES_HEADER;
+	public static String VISUAL_EDITOR_ENGINE_RESTART_CONFIRM;
+	public static String VISUAL_EDITOR_ENGINE_RESTART_CONFIRM_MESSAGE;
+	
+	public static String ENGINE_DIALOG_DO_NOT_SHOW_AGAIN;
+	public static String ENGINE_DIALOG_HEADER;
+	public static String ENGINE_DIALOG_CHANGE_TO;
+	public static String ENGINE_DIALOG_STAY_WITH;
+	public static String ENGINE_DIALOG_HTML5;
+	public static String ENGINE_DIALOG_JSF;
 }

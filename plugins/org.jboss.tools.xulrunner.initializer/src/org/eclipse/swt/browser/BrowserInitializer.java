@@ -49,7 +49,10 @@ public class BrowserInitializer {
 			String defaultType = System.getProperty(PROPERTY_DEFAULTTYPE);
 			if (defaultType == null) {
 				//loadxulrunner flag on linux must disable only xulrunner engine. But we can use WebKit for Preview
-				defaultType = isGTK3() || !XULRunnerInitializer.EMBEDDED_XULRUNNER_ENABLED ? "webkit" : "mozilla"; //$NON-NLS-1$ //$NON-NLS-2$
+				boolean XulrunnerCannotBeUsed = isGTK3() 
+											|| !XULRunnerInitializer.EMBEDDED_XULRUNNER_ENABLED 
+											|| WebKitInitializer.WEBKIT_ENABLED_BY_USER;
+				defaultType = XulrunnerCannotBeUsed ? "webkit" : "mozilla"; //$NON-NLS-1$ //$NON-NLS-2$
 				System.setProperty(PROPERTY_DEFAULTTYPE, defaultType);
 			}
 		}

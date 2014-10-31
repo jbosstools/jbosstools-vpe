@@ -27,6 +27,8 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Listener;
+import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.xulrunner.PlatformIsNotSupportedException;
 import org.jboss.tools.vpe.xulrunner.VpeXulrunnerMessages;
 import org.jboss.tools.vpe.xulrunner.XulRunnerBundleNotFoundException;
@@ -114,6 +116,8 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 
 	public XulRunnerBrowser(Composite parent) throws XulRunnerException {
 		ensureEmbeddedXulRunnerEnabled();
+		ensureEmbeddedXulRunnerIsNotDisabledByDialog();
+		
 		getXulRunnerPath();
 	    browser = new Browser(parent, SWT.MOZILLA);
 	    
@@ -268,6 +272,17 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 		if (!EMBEDDED_XULRUNNER_ENABLED) {
 			throw new XulRunnerException(MessageFormat.format(
 					VpeXulrunnerMessages.XulRunnerBrowser_embeddedXulRunnerIsDisabledByOption, LOAD_XULRUNNER_SYSTEM_PROPERTY));
+		}
+	}
+	
+	/**
+	 * Check if embedded XULRunner is disabled EngineDialog
+	 * 
+	 * @see <a href="https://issues.jboss.org/browse/JBIDE-18177">JBIDE-18177</a>
+	 */
+	public static void ensureEmbeddedXulRunnerIsNotDisabledByDialog() throws XulRunnerException {
+		if (WebUiPlugin.getDefault().getPreferenceStore().getBoolean(IVpePreferencesPage.USE_VISUAL_EDITOR_FOR_HTML5)) {
+			throw new XulRunnerException(VpeXulrunnerMessages.XulRunnerBrowser_visualEditorCannotWorkWithWebkit);
 		}
 	}
 

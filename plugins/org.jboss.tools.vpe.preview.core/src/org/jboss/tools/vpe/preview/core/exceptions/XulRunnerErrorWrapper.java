@@ -19,7 +19,6 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
-import org.eclipse.ui.internal.part.StatusPart;
 import org.jboss.tools.vpe.preview.core.Activator;
 import org.jboss.tools.vpe.xulrunner.XulRunnerBundleNotFoundException;
 import org.jboss.tools.vpe.xulrunner.XulRunnerException;
@@ -27,6 +26,8 @@ import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
 
 @SuppressWarnings("restriction")
 public class XulRunnerErrorWrapper {
+	public static final String ID = "org.jboss.tools.vpe.editor";  //$NON-NLS-1$
+	
 	/**
 	 * Logs given {@code throwable} (may be wrapped) and shows error message in 
 	 * the {@code parent} composite.
@@ -40,8 +41,7 @@ public class XulRunnerErrorWrapper {
 				&& "org.mozilla.xulrunner.win32.win32.x86_64".equals(((XulRunnerBundleNotFoundException) throwable).getBundleId())) { //$NON-NLS-1$
 			errorMessage = Messages.MOZILLA_EXPERIMENTAL_SUPPORT;
 		} else {
-			errorMessage = MessageFormat.format(
-					Messages.MOZILLA_LOADING_ERROR, throwable.getMessage());
+			errorMessage = MessageFormat.format(Messages.MOZILLA_LOADING_ERROR, throwable.getMessage());
 		}
 		Activator.logError(throwable, errorMessage);
 
@@ -58,8 +58,8 @@ public class XulRunnerErrorWrapper {
 
 		IStatus displayStatus = new Status(IStatus.ERROR,
 				Activator.PLUGIN_ID, errorMessage, throwable);
-		new StatusPart(statusComposite, displayStatus);
-
+		new LinkStatusPart(statusComposite, displayStatus, new Composite(parent, SWT.NONE));
+		
 		final Link link = new Link(parent, SWT.WRAP);
 		link.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		link.setBackground(bgColor);
