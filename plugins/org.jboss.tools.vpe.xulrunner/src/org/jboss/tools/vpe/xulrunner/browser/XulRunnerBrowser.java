@@ -114,6 +114,7 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 
 	public XulRunnerBrowser(Composite parent) throws XulRunnerException {
 		ensureEmbeddedXulRunnerEnabled();
+		
 		getXulRunnerPath();
 	    browser = new Browser(parent, SWT.MOZILLA);
 	    
