@@ -3,6 +3,8 @@ package org.jboss.tools.vpe.editor.util;
 import java.lang.reflect.Field;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.swt.browser.XULRunnerInitializer;
+import org.jboss.tools.vpe.preview.core.util.PlatformUtil;
 
 public class VpePlatformUtil {
 	public static final String LOAD_XULRUNNER_ENGINE = "org.jboss.tools.vpe.engine.xulrunner"; //$NON-NLS-1$
@@ -38,7 +40,20 @@ public class VpePlatformUtil {
 		return !"0".equals(gtk3); //$NON-NLS-1$
 	}
 	
+	/**
+	 * @return true if Xulrunner is enabled <b>for tests</b>
+	 */
 	public static boolean isXulrunnerEnabled() {
 		return Boolean.valueOf(System.getProperty(LOAD_XULRUNNER_ENGINE));
+	}
+	
+	/** 
+	 * Xulrunner can be loaded on Linux if Eclipse started against GTK2 and Xulrunner is not disabled by option
+	 * org.jboss.tools.vpe.loadxulrunner=false
+	 * 
+	 * @return true if Xulrunner can be loaded
+	 */
+	public static boolean xulrunnerCanBeLoadedOnLinux() {
+		return PlatformUtil.isLinux() && XULRunnerInitializer.EMBEDDED_XULRUNNER_ENABLED && !VpePlatformUtil.isGTK3();
 	}
 }
