@@ -24,8 +24,10 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.ui.internal.WorkbenchWindow;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
@@ -216,6 +218,10 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 					setCommandToggleState(ScrollLockSourceVisualHandler.COMMAND_ID, prefsSynchronizeScrolling);
 				//}
 			}
+		}
+		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (window instanceof WorkbenchWindow) {
+			((WorkbenchWindow)window).getCoolBarManager2().update(true);
 		}
 		return true;
 	}
