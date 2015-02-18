@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
+import org.jboss.tools.jst.jsp.preferences.xpl.LabelFieldEditor;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
@@ -41,6 +42,7 @@ import org.jboss.tools.vpe.handlers.ShowBundleAsELHandler;
 import org.jboss.tools.vpe.handlers.ShowNonVisualTagsHandler;
 import org.jboss.tools.vpe.handlers.ShowTextFormattingHandler;
 import org.jboss.tools.vpe.messages.VpeUIMessages;
+import org.jboss.tools.vpe.preview.core.util.PlatformUtil;
 
 public class VpePreferencesPage extends FieldEditorPreferencePage implements
 		IWorkbenchPreferencePage, IVpePreferencesPage {
@@ -103,14 +105,12 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 		pageContainer.setLayout(layout);
 		pageContainer.setLayoutData(gd);
 		
-//		visualEditorToolbarGroup = createLayoutGroup(pageContainer,
-//				SWT.SHADOW_ETCHED_IN,
-//				VpeUIMessages.VISUAL_EDITOR_TOOLBAR_BEHAVIOR);
-		if (VpePlatformUtil.xulrunnerCanBeLoadedOnLinux()) {
+		if (PlatformUtil.isLinux()) {
 			visualEditorEngineGroup = createLayoutGroup(pageContainer,
 					SWT.SHADOW_ETCHED_IN,
 					VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_GROUP_TITLE);
 		}
+		
 		visualAppearanceGroup = createLayoutGroup(pageContainer,
 				SWT.SHADOW_ETCHED_IN,
 				VpeUIMessages.VISUAL_APPEARANCE_GROUP_TITLE);
@@ -140,12 +140,29 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 //		addField(new VpeBooleanFieldEditor(SHOW_VISUAL_TOOLBAR,
 //				VpeUIMessages.SHOW_VPE_TOOLBAR,
 //				visualEditorToolbarGroup));
-	    if (VpePlatformUtil.xulrunnerCanBeLoadedOnLinux()) {
-			String[][] labelsAndValues = new String[][] {
-					{ VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_JSF, String.valueOf(false) },
-					{ VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HTML5, String.valueOf(true) } };
-		    addField(new VpeRadioGroupFieldEditor(USE_VISUAL_EDITOR_FOR_HTML5,
-		    		VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HEADER, 1, labelsAndValues, visualEditorEngineGroup));
+	    if (PlatformUtil.isLinux()) {
+	    	boolean xulrunnerCanBeLoaded = VpePlatformUtil.xulrunnerCanBeLoadedOnLinux();
+	    	String[][] labelsAndValues = new String[][] {
+	    			{ VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_JSF, String.valueOf(false) },
+	    			{ VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HTML5, String.valueOf(true) } };
+	    	
+	    	if (!xulrunnerCanBeLoaded) {
+	    		addField(new LabelFieldEditor(VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_DISABLED, visualEditorEngineGroup));
+	    		VpeRadioGroupFieldEditor mode = new VpeRadioGroupFieldEditor(USE_VISUAL_EDITOR_FOR_HTML5,
+	    				VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HEADER, 1, labelsAndValues, visualEditorEngineGroup);
+	    		VpeBooleanFieldEditor remember = new VpeBooleanFieldEditor(REMEMBER_VISUAL_EDITOR_ENGINE,
+	    				VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_SHOW_DIALOG, visualEditorEngineGroup);
+	    		remember.setEnabled(false, visualEditorEngineGroup);
+	    		mode.setEnabled(false, visualEditorEngineGroup);	    		
+	    		addField(mode);
+	    		addField(remember);
+	    	} else {
+	    		addField(new VpeRadioGroupFieldEditor(USE_VISUAL_EDITOR_FOR_HTML5,
+	    				VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HEADER, 1, labelsAndValues, visualEditorEngineGroup));
+	    		addField(new VpeBooleanFieldEditor(REMEMBER_VISUAL_EDITOR_ENGINE,
+	    				VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_SHOW_DIALOG, visualEditorEngineGroup));
+	    	}
+	    	
 	    }
 	    addField(new VpeBooleanFieldEditor(SHOW_BORDER_FOR_UNKNOWN_TAGS,
 				VpeUIMessages.SHOW_BORDER_FOR_UNKNOWN_TAGS,
