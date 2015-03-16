@@ -37,7 +37,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IStatusField;
@@ -49,10 +48,6 @@ import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.StorageRevisionEditorInputAdapter;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.bar.SelectionBar;
-import org.jboss.tools.vpe.IVpeHelpContextIds;
-import org.jboss.tools.vpe.VpePlugin;
-import org.jboss.tools.vpe.editor.IVisualEditor2;
-import org.jboss.tools.vpe.editor.mozilla.listener.EditorLoadWindowListener;
 import org.jboss.tools.vpe.editor.xpl.CustomSashForm;
 import org.jboss.tools.vpe.editor.xpl.CustomSashForm.ICustomSashFormListener;
 import org.jboss.tools.vpe.editor.xpl.EditorSettings;
@@ -168,7 +163,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 	public void setVisualMode(int type) {
 		switch (type) {
 		case VISUALSOURCE_MODE:
-			VpePlugin.getDefault().countVpvTabEvent();
+			Activator.getDefault().countVpvTabEvent();
 			setVerticalToolbarVisible(WebUiPlugin.getDefault().getPreferenceStore()
 					.getBoolean(IVpePreferencesPage.SHOW_VISUAL_TOOLBAR));
 			/*
@@ -190,7 +185,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			break;
 
 		case SOURCE_MODE:
-			VpePlugin.getDefault().countSourceTabEvent();
+			Activator.getDefault().countSourceTabEvent();
 			setVerticalToolbarVisible(false);
 
 			if (sourceContent != null) {
@@ -205,7 +200,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			break;
 
 		case PREVIEW_MODE:
-			VpePlugin.getDefault().countVpvTabEvent();
+			Activator.getDefault().countVpvTabEvent();
 			setVerticalToolbarVisible(false);
 			if (previewContent != null) {
 			    vpvPreview.refresh(vpvPreview.getBrowser());
@@ -258,7 +253,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 	}
 	
 	public void createPartControl(final Composite parent) {
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IVpeHelpContextIds.VISUAL_PAGE_EDITOR);
+		//PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IVpeHelpContextIds.VISUAL_PAGE_EDITOR);
 		/*
 		 * Container composite for editor part
 		 */
@@ -452,7 +447,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			window.getPartService().addPartListener(activationListener);
 			
 		} catch (CoreException e) {
-			VpePlugin.reportProblem(e);
+			Activator.getDefault().logError(e);
 		}
 
 		if (editorSettings != null)
@@ -606,7 +601,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 		try {
 			visualEditor.init(getEditorSite(), getEditorInput());
 		} catch (PartInitException e) {
-			VpePlugin.reportProblem(e);
+			Activator.getDefault().logError(e);
 		}
 
 		visualEditor.setEditorLoadWindowListener(new EditorLoadWindowListener() {
@@ -644,7 +639,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			});
 			vpvPreview.createPartControl(previewContent);
 		} catch (PartInitException e) {
-			VpePlugin.reportProblem(e);
+			Activator.getDefault().logError(e);
 		}
 	}
 	
@@ -762,7 +757,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 		if (selectionBar != null) {
 			selectionBar.setVisible(isSelectionBarVisible);
 		} else {
-			VpePlugin.getDefault().logError(Messages.VpvEditorPart_SELECTION_BAR_NOT_INITIALIZED);
+			Activator.getDefault().logError(Messages.VpvEditorPart_SELECTION_BAR_NOT_INITIALIZED);
 		}
 	}
 
