@@ -11,8 +11,6 @@
 package org.jboss.tools.vpe.preview.editor;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPathEditorInput;
@@ -23,35 +21,19 @@ import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditorFactory;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
-import org.jboss.tools.vpe.editor.VpeEditorPart;
-import org.jboss.tools.vpe.editor.util.VpePlatformUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
  */
 public class VpeEditorPartFactory implements IVisualEditorFactory {	
-	private static final String WEBKIT_ENABLED_BY_VPE_USER_SYSTEM_PROPERTY = "org.jboss.tools.vpe.webkit.enabledbyuser"; //$NON-NLS-1$
-	
 	static {
 		//Since we do not implement the option of showing Visual toolbar for preview editor into Eclipse toolbar - must always show visual toolbar within the editor
 	    WebUiPlugin.getDefault().getPreferenceStore().setValue(IVpePreferencesPage.SHOW_VISUAL_TOOLBAR, true);
-	    //set this property to see which browser engine was chosen before start(xulrunner is default)
-	    System.setProperty(WEBKIT_ENABLED_BY_VPE_USER_SYSTEM_PROPERTY,
-	    		Boolean.toString(WebUiPlugin.getDefault().getPreferenceStore().getBoolean(IVpePreferencesPage.USE_VISUAL_EDITOR_FOR_HTML5)));
 	    
 	}
 	
-	public IVisualEditor createVisualEditor(final EditorPart multiPageEditor, StructuredTextEditor textEditor, int visualMode, BundleMap bundleMap) {
-	    //this property is added in VPE tests to make VPE always opened 
-	    if (VpePlatformUtil.isXulrunnerEnabled()) {
-			return getVpeEditor(multiPageEditor, textEditor, visualMode, bundleMap);
-		}
-
-		if (!VpePlatformUtil.isXulrunnerEnabled()) {
-			return getPreviewEditor(multiPageEditor, textEditor, visualMode, bundleMap);
-		}
-		
+	public IVisualEditor createVisualEditor(final EditorPart multiPageEditor, StructuredTextEditor textEditor, int visualMode, BundleMap bundleMap) {		
 	    IEditorInput editorInput = multiPageEditor.getEditorInput();
 		boolean isHtmlFile = false;
 		if (editorInput instanceof IFileEditorInput) { //file opened from workspace
@@ -65,30 +47,10 @@ public class VpeEditorPartFactory implements IVisualEditorFactory {
 		}
 		
 		if (isHtmlFile) {
-			if (VpePlatformUtil.xulrunnerCanBeLoadedOnLinux()
-				&& !WebUiPlugin.getDefault().getPreferenceStore().getBoolean(IVpePreferencesPage.USE_VISUAL_EDITOR_FOR_HTML5)
-				&& !WebUiPlugin.getDefault().getPreferenceStore().getBoolean(IVpePreferencesPage.REMEMBER_VISUAL_EDITOR_ENGINE)) {
-		    	EngineDialog d = new EngineDialog(Display.getDefault().getActiveShell());
-		    	d.open();
-		    }
 			return getPreviewEditor(multiPageEditor, textEditor, visualMode, bundleMap);
 		} else {
-			if (VpePlatformUtil.xulrunnerCanBeLoadedOnLinux()
-				&& WebUiPlugin.getDefault().getPreferenceStore().getBoolean(IVpePreferencesPage.USE_VISUAL_EDITOR_FOR_HTML5)
-				&& !WebUiPlugin.getDefault().getPreferenceStore().getBoolean(IVpePreferencesPage.REMEMBER_VISUAL_EDITOR_ENGINE)) {
-			    EngineDialog d = new EngineDialog(Display.getDefault().getActiveShell());
-			    d.open();
-			}
-			return getVpeEditor(multiPageEditor, textEditor, visualMode, bundleMap);
+			return null;
 		}
-	}
-	
-	private IVisualEditor getVpeEditor(final EditorPart multiPageEditor, StructuredTextEditor textEditor, int visualMode, BundleMap bundleMap) {
-		return new VpeEditorPart(multiPageEditor, textEditor, visualMode, bundleMap) {
-			public void doSave(IProgressMonitor monitor) {
-				multiPageEditor.doSave(monitor);
-			}
-		};
 	}
 
 	private IVisualEditor getPreviewEditor(final EditorPart multiPageEditor, StructuredTextEditor textEditor, int visualMode, BundleMap bundleMap) {
