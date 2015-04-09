@@ -22,16 +22,10 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
@@ -62,8 +56,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.ILocationProvider;
-import org.eclipse.ui.part.EditorPart;
-import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
@@ -83,11 +75,12 @@ import org.jboss.tools.vpe.preview.core.util.ActionBar;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
+import org.w3c.dom.Node;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
  */
-public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReusableEditor{
+public class VpvEditor extends DocumentListeningEditorPart implements VpvVisualModelHolder, IReusableEditor{
 	/*
 	 * Paths for tool bar icons
 	 */
@@ -149,14 +142,12 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	private IVpeToolBarManager vpeToolBarManager;
 	
 	private EditorLoadWindowListener editorLoadWindowListener;
-	private IDocumentListener documentListener;
 	
 	private Browser browser;
 	private VpvVisualModel visualModel;
 	private int modelHolderId;
 	private SelectionListener selectionListener;
 	protected IEditorPart sourceEditor;
-	private Job currentJob;
 	
 	private ActionBar actionBar;
 	protected BrowserErrorWrapper errorWrapper = new BrowserErrorWrapper();
@@ -513,7 +504,21 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 			rotateEditorsAction.setToolTipText(layoutNames.get(prefsOrientation));
 		}
 	}
-	
+
+	public Long getCurrentSelectedElementId() {
+		if(sourceEditor!=null) {
+			ISelection currentSelection = sourceEditor.getEditorSite().getSelectionProvider().getSelection();
+			if(currentSelection!=null) {
+				Node sourceNode = EditorUtil.getNodeFromSelection((IStructuredSelection) currentSelection);
+				Long currentSelectionId = NavigationUtil.getIdForSelection(sourceNode, visualModel);
+				if(currentSelectionId!=null) {
+					return currentSelectionId;
+				}
+			}
+		}
+		return null;
+	}
+
 	public void refresh() {
 		if (browser != null && !browser.isDisposed()) {
 			if (ABOUT_BLANK.equals(browser.getUrl())) {
@@ -524,7 +529,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 		}
 	}
 
-    /**
+	/**
      * @return the controller
      */
 	public VpvEditorController getController() {
@@ -556,9 +561,9 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	 * @param sourceEditor the sourceEditor to set
 	 */
 	protected void setSourceEditor(IEditorPart sourceEditor) {
-		removeDocumentListener(); // removing old document listener
+		removeDocumentListener(sourceEditor); // removing old document listener
 		this.sourceEditor = sourceEditor;
-		addDocumentListener(); // adding a new one
+		addDocumentListener(sourceEditor); // adding a new one
 	}
 	
 	private void inizializeSelectionListener() {
@@ -607,73 +612,6 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
             }
         }
 	}
-	
-	private void updatePreview() {
-		if (currentJob == null || currentJob.getState() != Job.WAITING) {
-			if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
-				currentJob.cancel();
-			}
-			currentJob = createPreviewUpdateJob();
-		}
-
-		currentJob.schedule(500);
-	}
-	
-	private Job createPreviewUpdateJob() {
-		Job job = new UIJob("Preview Update") { //$NON-NLS-1$
-			@Override
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				if (browser != null && !browser.isDisposed()) {
-					refresh();
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		return job;
-	}
-
-	private IDocument getDocument() {
-		return (IDocument) this.sourceEditor.getAdapter(IDocument.class);
-	}
-	
-	private void removeDocumentListener() {
-		if (this.sourceEditor != null) {
-			IDocument document = getDocument();
-			if (document != null) {
-				document.removeDocumentListener(getDocumentListener());
-			}
-		}
-	}
-	
-	private void addDocumentListener() {
-		if (this.sourceEditor != null) {
-			IDocument document = getDocument();
-			if (document != null) {
-				document.addDocumentListener(getDocumentListener());
-			}
-		}
-	}
-	
-	
-	private IDocumentListener getDocumentListener() {
-		if (documentListener == null) {
-			documentListener = new IDocumentListener() {
-
-				@Override
-				public void documentAboutToBeChanged(DocumentEvent event) {
-				}
-
-				@Override
-				public void documentChanged(DocumentEvent event) {
-					if (actionBar.isAutomaticRefreshEnabled() && controller.isVisualEditorVisible()) {
-						updatePreview();
-					}
-				}
-
-			};
-		}
-		return documentListener;
-	} 
 
 	public ActionBar getActionBar() {
 		return actionBar;
@@ -687,5 +625,15 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 				NavigationUtil.updateSelectionAndScrollToIt(selection, browser, visualModel);
 			}
 		}
+	}
+
+	@Override
+	protected void performAction() {
+		refresh();
+	}
+
+	@Override
+	protected boolean actionHappening() {
+		return actionBar.isAutomaticRefreshEnabled() && controller.isVisualEditorVisible();
 	}
 }
