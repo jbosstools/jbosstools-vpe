@@ -520,8 +520,8 @@ public class VpvEditor extends DocumentListeningEditorPart implements VpvVisualM
 	}
 
 	public void refresh() {
-		if (browser != null && !browser.isDisposed()) {
-			if (ABOUT_BLANK.equals(browser.getUrl())) {
+		if (browser != null && !browser.isDisposed()) { 
+			if (isURLDefault(browser.getUrl())) {
 				formRequestToServer();
 			} else {
 				browser.setUrl(NavigationUtil.fixUrl(browser));
@@ -529,6 +529,15 @@ public class VpvEditor extends DocumentListeningEditorPart implements VpvVisualM
 		}
 	}
 
+	/** For IE and WebKit default URL is about:blank
+	 *  For XulRunner 1.9 which we ship default URL is empty string.
+	 * 
+	 * @return <code>true</code> if URL is default
+	 */
+	private boolean isURLDefault(String url) {
+		return ABOUT_BLANK.equals(url) || "".equals(url); //$NON-NLS-1$
+	}
+	
 	/**
      * @return the controller
      */
