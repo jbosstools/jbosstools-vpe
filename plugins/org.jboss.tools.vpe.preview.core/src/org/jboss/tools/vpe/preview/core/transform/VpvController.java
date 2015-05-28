@@ -77,7 +77,9 @@ public class VpvController {
 		}
 
 		String htmlText = null;
-		if (visualModel != null) {
+		// if requested html file has no visual model holder it means that this file is not opened in editor(or external browser)
+		// it may be an included html file, so we should return it as a file, not as a html text
+		if (visualModel != null && visualModelHolder != null) {
 			try {
 				htmlText = DomUtil.nodeToString(visualModel.getVisualDocument());
 			} catch (TransformerException e) {
