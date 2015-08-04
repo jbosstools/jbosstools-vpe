@@ -236,17 +236,11 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 				@Override
 				public void documentChanged(DocumentEvent event) {
 					if (actionBar.isAutomaticRefreshEnabled()) {
-						String fileExtension = EditorUtil.getFileExtensionFromEditor(currentEditor);
-						if (SuitableFileExtensions.isCssOrJs(fileExtension)) {
-							currentEditor.doSave(new NullProgressMonitor()); // saving all js and css stuff
-						}
 						updatePreview();
 					}
 				}
-
 			};
 		}
-
 		return documentListener;
 	}
 
