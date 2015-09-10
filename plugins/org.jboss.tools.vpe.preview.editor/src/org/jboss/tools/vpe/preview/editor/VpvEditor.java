@@ -453,6 +453,7 @@ public class VpvEditor extends DocumentListeningEditorPart implements VpvVisualM
 	}
 	
 	public void dispose() {
+		removeDocumentListener(sourceEditor);
 		if (selectionBarCloseListener != null) {
 			WebUiPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(selectionBarCloseListener);
 		}
@@ -643,6 +644,6 @@ public class VpvEditor extends DocumentListeningEditorPart implements VpvVisualM
 
 	@Override
 	protected boolean actionHappening() {
-		return actionBar.isAutomaticRefreshEnabled() && controller.isVisualEditorVisible();
+		return actionBar.isAutomaticRefreshEnabled() && controller!=null && controller.isVisualEditorVisible();
 	}
 }

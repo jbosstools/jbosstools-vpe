@@ -64,8 +64,8 @@ public abstract class DocumentListeningEditorPart extends EditorPart{
 	protected void removeDocumentListener(IEditorPart sourceEditor) {
 		if (sourceEditor != null) {
 			IDocument document = getDocument(sourceEditor);
-			if (document != null) {
-				document.removeDocumentListener(getDocumentListener());
+			if (document != null && documentListener != null) {
+				document.removeDocumentListener(documentListener);
 			}
 		}
 	}
