@@ -19,10 +19,6 @@
       %license
    </license>
 
-   <includes
-         id="org.jboss.tools.vpe.preview.feature"
-         version="0.0.0"/>
-
    <plugin
          id="org.jboss.tools.vpe"
          download-size="0"
