@@ -517,6 +517,7 @@ public class VpvEditor extends DocumentListeningEditorPart implements VpvVisualM
 		
 		if (showSelectionBarAction != null) {
 			showSelectionBarAction.setChecked(prefsShowSelectionBar);
+			showSelectionBarAction.run();
 		}
 		if (rotateEditorsAction != null) {
 			currentOrientationIndex = prefsOrientationIndex;
