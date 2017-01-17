@@ -667,6 +667,6 @@ public class VpvEditor extends DocumentListeningEditorPart implements VpvVisualM
 
 	@Override
 	protected boolean actionHappening() {
-		return actionBar.isAutomaticRefreshEnabled() && controller.isVisualEditorVisible();
+		return actionBar.isAutomaticRefreshEnabled() && controller!=null && controller.isVisualEditorVisible();
 	}
 }
