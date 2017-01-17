@@ -79,3 +79,5 @@ And then [generate a pull-request](http://help.github.com/pull-requests/) where 
 review the proposed changes, comment on them, discuss them with you,
 and if everything is good merge the changes right into the official
 repository.
+
+== Testing central ci jenkins - Do not merge
