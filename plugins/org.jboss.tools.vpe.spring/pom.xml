@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.jboss.tools.vpe</groupId>
 		<artifactId>plugins</artifactId>
-		<version>3.8.3-SNAPSHOT</version>
+		<version>3.8.100-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.vpe.plugins</groupId>
 	<artifactId>org.jboss.tools.vpe.spring</artifactId> 

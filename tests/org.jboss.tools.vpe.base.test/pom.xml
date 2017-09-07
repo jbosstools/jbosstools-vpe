@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.jboss.tools.vpe</groupId>
 		<artifactId>tests</artifactId>
-		<version>3.8.3-SNAPSHOT</version>
+		<version>3.8.100-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.vpe.tests</groupId>
 	<artifactId>org.jboss.tools.vpe.base.test</artifactId>
