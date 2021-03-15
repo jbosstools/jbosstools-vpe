@@ -56,6 +56,6 @@ Require-Bundle: org.eclipse.jface.text;bundle-version="3.7.0",
  org.eclipse.wst.common.snippets;bundle-version="1.2.100",
  org.jboss.tools.vpe.preview.core,
  org.jboss.tools.usage;bundle-version="2.0.0"
-Bundle-Version: 3.8.300.qualifier
+Bundle-Version: 3.9.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BundleShape: dir
