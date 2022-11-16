@@ -18,23 +18,25 @@ import org.jboss.tools.vpe.editor.util.VpeStyleUtil;
 
 public class VpeColorSelector extends ColorSelector {
 
-	private Text colorText; 
-	
+	private Text colorText;
+
 	public VpeColorSelector(Composite parent) {
 		super(parent);
 		colorText = new Text(parent, SWT.NONE);
 		colorText.setEditable(false);
 		colorText.setTextLimit(9);
 	}
-	
+
 	@Override
 	protected void updateColorImage() {
 		super.updateColorImage();
-		colorText.setText(VpeStyleUtil.rgbToString(getColorValue()));
+		if (colorText != null) {
+			colorText.setText(VpeStyleUtil.rgbToString(getColorValue()));
+		}
 	}
 
 	public Text getColorText() {
 		return colorText;
 	}
-	
+
 }

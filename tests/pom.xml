@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.jboss.tools</groupId>
 		<artifactId>vpe</artifactId>
-		<version>3.9.0-SNAPSHOT</version>
+		<version>3.9.100-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.vpe</groupId>
 	<artifactId>tests</artifactId>
@@ -18,7 +18,6 @@
 		<module>org.jboss.tools.vpe.html.test</module>
 		<module>org.jboss.tools.vpe.spring.test</module>
 		<module>org.jboss.tools.vpe.jsp.test</module>
-		<module>org.jboss.tools.vpe.jst.test</module>
 		<module>org.jboss.tools.vpe.test</module>
 		<module>org.jboss.tools.vpe.preview.editor.test</module>
 	</modules>
