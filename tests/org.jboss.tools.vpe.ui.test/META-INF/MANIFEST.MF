@@ -21,7 +21,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.xml.xpath.core,
  org.jboss.tools.vpe.base.test;bundle-version="1.0.0",
  org.eclipse.wst.html.core,
- javax.annotation,
  org.jboss.tools.vpe.preview.editor
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
