@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
 	<description>To install these features, point Eclipse at this site.</description>
-	<!-- JBoss Tools vpe Nightly Build Update Site -->
+	<!-- JBoss Tools VPE Nightly Build Update Site -->
 	<!--VPE-->
-	<category-def label="JBoss Tools vpe Nightly Build Update Site" name="JBoss Tools vpe Nightly Build Update Site">
-		<description>JBoss Tools vpe Nightly Build Update Site: contains all features in this build.</description>
+	<category-def label="JBoss Tools VPE Nightly Build Update Site" name="JBoss Tools VPE Nightly Build Update Site">
+		<description>JBoss Tools VPE Nightly Build Update Site: contains all features in this build.</description>
 	</category-def>
 	<feature url="features/org.jboss.tools.vpe.feature_0.0.0.jar" id="org.jboss.tools.vpe.feature" version="0.0.0">
-		<category name="JBoss Tools vpe Nightly Build Update Site"/>
+		<category name="JBoss Tools VPE Nightly Build Update Site"/>
 	</feature>
-	<feature url="features/org.jboss.tools.vpe.test.feature_0.0.0.jar" id="org.jboss.tools.vpe.test.feature" version="0.0.0">
+	<!-- <feature url="features/org.jboss.tools.vpe.test.feature_0.0.0.jar" id="org.jboss.tools.vpe.test.feature" version="0.0.0">
 		<category name="JBoss Tools VPE Test Nightly Build Update Site"/>
-	</feature>
+	</feature> -->
 	<feature url="features/org.jboss.tools.vpe.preview.feature_0.0.0.jar" id="org.jboss.tools.vpe.preview.feature" version="0.0.0">
-		<category name="JBoss Tools vpe Nightly Build Update Site"/>
+		<category name="JBoss Tools VPE Nightly Build Update Site"/>
 	</feature>
 
 	<!-- sources -->	
 	<feature url="features/org.jboss.tools.vpe.feature.source_0.0.0.jar" id="org.jboss.tools.vpe.feature.source" version="0.0.0">
-		<category name="JBoss Tools vpe Nightly Build Update Site"/>
+		<category name="JBoss Tools VPE Nightly Build Update Site"/>
 	</feature>
-	<feature url="features/org.jboss.tools.vpe.test.feature.source_0.0.0.jar" id="org.jboss.tools.vpe.test.feature.source" version="0.0.0">
+	<!-- <feature url="features/org.jboss.tools.vpe.test.feature.source_0.0.0.jar" id="org.jboss.tools.vpe.test.feature.source" version="0.0.0">
 		<category name="JBoss Tools VPE Test Nightly Build Update Site"/>
-	</feature>
+	</feature> -->
 	<feature url="features/org.jboss.tools.vpe.preview.feature.source_0.0.0.jar" id="org.jboss.tools.vpe.preview.feature.source" version="0.0.0">
-		<category name="JBoss Tools VPE Test Nightly Build Update Site"/>
+		<category name="JBoss Tools VPE Nightly Build Update Site"/>
 	</feature>
 
 </site>
